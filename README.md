@@ -27,7 +27,7 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## 当前阶段
 
-项目目前处于 XINGSHU 2.0 Phase 1（基础设施与公开边界建立阶段）。当前仓库只建立最小公开基础文件；Global Governance、Schema、Adapter 与 Runtime 尚未作为公开实现发布。
+项目目前处于 XINGSHU 2.0 Phase 1（基础设施与公开边界建立阶段）。Public Governance v0.1 candidates（公共治理 v0.1 候选）已建立，当前状态为 `candidate`，尚未激活为正式 Public Core Governance（公共核心治理）。Schema、Adapter 与 Runtime 尚未作为公开实现发布。
 
 ## Security（安全）
 
