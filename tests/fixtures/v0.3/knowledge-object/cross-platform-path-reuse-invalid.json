@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.3",
+  "record_type": "knowledge_object",
+  "record_id": "record:knowledge:004",
+  "created_at": "2026-02-04T00:00:00Z",
+  "object_id": "knowledge:synthetic-reuse",
+  "topic_ref": "topic:synthetic-reuse",
+  "document_role": "main",
+  "origin_form": "source",
+  "document_state": "candidate",
+  "migration_state": "migrated",
+  "runtime_validation_state": "unknown",
+  "scope": {
+    "scope_type": "device_class",
+    "environment_class": "local_runtime",
+    "platform": "windows",
+    "version_constraints": ["synthetic-v1"]
+  },
+  "summary": "A platform-specific local path must not be reused across platforms.",
+  "source_refs": ["source:synthetic:windows-procedure"],
+  "evidence_refs": ["evidence:synthetic:windows-only"],
+  "relationships": {"appendix_refs": [], "provenance_refs": ["provenance:synthetic-reuse"], "derived_from": [], "supersedes": [], "superseded_by": []},
+  "source_of_truth": true,
+  "write_back_to_source": false,
+  "current_loading_allowed": false,
+  "reuse_claim": {
+    "origin_platform": "windows",
+    "target_platform": "macos",
+    "scope_match": "mismatch",
+    "local_path_reused": true
+  },
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

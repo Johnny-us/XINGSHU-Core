@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.3",
+  "record_type": "knowledge_object",
+  "record_id": "record:knowledge:003",
+  "created_at": "2026-02-03T00:00:00Z",
+  "object_id": "knowledge:synthetic-appendix",
+  "topic_ref": "topic:synthetic-knowledge",
+  "document_role": "appendix",
+  "origin_form": "source",
+  "document_state": "active",
+  "migration_state": "migrated",
+  "runtime_validation_state": "pending_verification",
+  "scope": {
+    "scope_type": "global",
+    "environment_class": "document_review",
+    "platform": "platform_neutral",
+    "version_constraints": ["synthetic-v1"]
+  },
+  "summary": "An appendix cannot become a second source of truth.",
+  "source_refs": ["source:synthetic:appendix"],
+  "evidence_refs": ["evidence:synthetic:appendix"],
+  "relationships": {
+    "main_ref": "knowledge:synthetic-main",
+    "appendix_refs": [],
+    "provenance_refs": [],
+    "derived_from": [],
+    "supersedes": [],
+    "superseded_by": []
+  },
+  "source_of_truth": true,
+  "write_back_to_source": false,
+  "current_loading_allowed": true,
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

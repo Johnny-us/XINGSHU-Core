@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.3",
+  "record_type": "knowledge_object",
+  "record_id": "record:knowledge:002",
+  "created_at": "2026-02-02T00:00:00Z",
+  "object_id": "knowledge:synthetic-derived",
+  "topic_ref": "topic:synthetic-knowledge",
+  "document_role": "appendix",
+  "origin_form": "derived_view",
+  "document_state": "candidate",
+  "migration_state": "not_applicable",
+  "runtime_validation_state": "not_run",
+  "scope": {
+    "scope_type": "global",
+    "environment_class": "document_review",
+    "platform": "platform_neutral",
+    "version_constraints": ["synthetic-v1"]
+  },
+  "summary": "A derived view must not overwrite its source.",
+  "source_refs": ["source:synthetic:knowledge"],
+  "evidence_refs": [],
+  "relationships": {
+    "main_ref": "knowledge:synthetic-main",
+    "appendix_refs": [],
+    "provenance_refs": [],
+    "derived_from": ["knowledge:synthetic-main"],
+    "supersedes": [],
+    "superseded_by": []
+  },
+  "source_of_truth": false,
+  "write_back_to_source": true,
+  "current_loading_allowed": false,
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

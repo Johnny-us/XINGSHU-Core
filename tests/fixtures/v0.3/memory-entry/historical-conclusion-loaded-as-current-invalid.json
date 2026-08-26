@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.3",
+  "record_type": "memory_entry",
+  "record_id": "record:memory:006",
+  "created_at": "2026-01-15T00:00:00Z",
+  "memory_id": "memory:historical:006",
+  "topic_ref": "topic:synthetic-history",
+  "scope": {
+    "scope_type": "global",
+    "environment_class": "document_review",
+    "platform": "platform_neutral",
+    "version_constraints": ["synthetic-v0"]
+  },
+  "conclusion_state": "historical",
+  "conclusion_summary": "A historical conclusion must not load as current.",
+  "source_refs": ["source:synthetic:history"],
+  "source_verification": {
+    "status": "verified",
+    "last_verified": "2025-01-01T00:00:00Z",
+    "environment_class": "document_review",
+    "method_refs": ["method:source-review:v1"]
+  },
+  "dedup_conflict_review": {
+    "status": "clear",
+    "duplicate_refs": [],
+    "conflict_refs": [],
+    "reason_codes": ["historical_only"]
+  },
+  "promotion_review": {
+    "status": "approved",
+    "reviewer_type": "human",
+    "reviewed_at": "2025-01-01T00:00:00Z",
+    "reason_codes": ["historical_only"]
+  },
+  "evidence_types": ["external_source"],
+  "evidence_refs": ["evidence:synthetic:history"],
+  "evidence_state": "historical",
+  "review_triggers": [
+    {"trigger_type": "manual_review_required", "condition": "Historical evidence is requested for audit."}
+  ],
+  "relationships": {"supersedes": [], "superseded_by": [], "derived_from": ["source:synthetic:history"], "related_knowledge_refs": []},
+  "current_loading_allowed": true,
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}
