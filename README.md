@@ -27,9 +27,14 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## 当前阶段
 
-本分支包含 XINGSHU-Core v0.2 Candidate（公共核心 v0.2 候选）的 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约）。
+本分支包含 XINGSHU-Core v0.3 Candidate（公共核心 v0.3 候选）。它在完整保留 v0.2 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约）的基础上，新增 Knowledge / Memory（知识 / 记忆）候选能力：
 
-所有 v0.2 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
+- Memory Distillation（记忆提炼）与事件触发复审；
+- Knowledge Object Model（知识对象模型）的 `main / appendix / provenance` 角色；
+- Migration Provenance（迁移溯源）以及迁移完成与运行验证分离；
+- 三个 v0.3 JSON Schema、可复制模板、合成失败夹具和匿名迁移案例。
+
+所有 v0.2 与 v0.3 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
 
 ## Quick Start（快速开始）
 
@@ -53,7 +58,10 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [Glossary](docs/GLOSSARY.md) | 公共术语解释，不创建新规则 |
 | [v0.1 → v0.2 Migration](docs/V0_1_TO_V0_2_MIGRATION.md) | 增量兼容、默认关闭与回退路径 |
 | [v0.2 Change Notes](docs/V0_2_CHANGE_NOTES.md) | v0.2 候选范围、状态与不包含项 |
-| [Schema Registry](schemas/README.md) | v0.2 机器 Schema 的唯一导航入口 |
+| [v0.3 Change Notes](docs/V0_3_CHANGE_NOTES.md) | v0.3 知识 / 记忆候选范围与兼容边界 |
+| [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
+| [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
+| [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
 | [Test Registry](tests/README.md) | Conformance（符合性）、Compatibility（兼容性）与合成 fixtures 入口 |
 | [Security Policy](SECURITY.md) | 安全报告与敏感信息边界 |
 | [Contributing](CONTRIBUTING.md) | 公共贡献范围与审查流程 |
@@ -62,6 +70,9 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 - [XINGSHU_ROOT.template.md](templates/XINGSHU_ROOT.template.md)：Personal Instance 根标识候选；
 - [AGENTS.template.md](templates/AGENTS.template.md)：Provider-neutral（能力提供方中立）的 Agent 接入候选。
+- [KNOWLEDGE_ENTRY.template.md](templates/KNOWLEDGE_ENTRY.template.md)：知识对象候选；
+- [MEMORY_ENTRY.template.md](templates/MEMORY_ENTRY.template.md)：记忆候选与晋升审查；
+- [MIGRATION_PROVENANCE.template.md](templates/MIGRATION_PROVENANCE.template.md)：迁移映射与来源保护记录。
 
 模板必须单向复制到独立 Personal Instance 后再完成私人配置；不得在 Public Core 模板中填写身份、设备、账号、项目或运行状态。
 
