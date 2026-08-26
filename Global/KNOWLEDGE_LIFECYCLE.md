@@ -69,6 +69,10 @@ AI 生成、改写、总结、推断、转换或从历史资料中抽取的内�
 
 具体领域需要更细的资产状态时，由 Domain Pack（领域包）扩展；不得把所有领域强行压成同一套文件状态名。
 
+### 3.3 Evidence Metadata Boundary（证据元数据边界）
+
+公共 Evidence（证据）的 Scope（作用域）、Freshness（时效）、Provenance（来源）、Correction（纠错）与 Historical State（历史状态）由 [Evidence Lifecycle（证据生命周期）](EVIDENCE_LIFECYCLE.md) 专项候选及对应 Schema 统一定义。本文件保留知识验收规则，不复制 Evidence 字段或状态机；Public Core 只保存 Metadata（元数据），不保存原始 Payload（载荷）或私人位置。
+
 ## 4. Knowledge Acceptance（知识验收）
 
 一项知识从 Draft（草案）升级为 `active` 前，按适用项检查：
