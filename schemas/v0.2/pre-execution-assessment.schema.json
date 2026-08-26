@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:v0.2:pre-execution-assessment",
+  "title": "XINGSHU Core v0.2 Pre-Execution Assessment",
+  "oneOf": [
+    {"$ref": "#/$defs/action_request"},
+    {"$ref": "#/$defs/assessment_result"},
+    {"$ref": "#/$defs/execution_result"},
+    {"$ref": "#/$defs/verification_result"},
+    {"$ref": "#/$defs/contract_error"}
+  ],
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "required": ["schema_version", "record_type", "record_id", "created_at"],
+      "properties": {
+        "schema_version": {"const": "0.2"},
+        "record_type": {"enum": ["action_request", "assessment_result", "execution_result", "verification_result", "contract_error"]},
+        "record_id": {"type": "string", "pattern": "^[ -~]{1,128}$"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "extensions": {"type": "object", "propertyNames": {"pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"}, "additionalProperties": {"type": "object"}}
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["result", "reason_codes"],
+      "properties": {"result": {"enum": ["pass", "needs_review", "fail", "unknown"]}, "reason_codes": {"type": "array", "items": {"type": "string"}}},
+      "additionalProperties": false
+    },
+    "authorization_evaluation": {
+      "type": "object",
+      "required": ["status", "authorization_refs", "scope_match", "freshness"],
+      "properties": {
+        "status": {"enum": ["valid", "required", "missing", "stale", "out_of_scope", "not_required", "unknown"]},
+        "authorization_refs": {"type": "array", "items": {"type": "string"}},
+        "scope_match": {"enum": ["match", "mismatch", "unknown", "not_applicable"]},
+        "freshness": {"enum": ["current", "stale", "unknown", "not_applicable"]}
+      },
+      "additionalProperties": false
+    },
+    "action_request": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["correlation_id", "objective", "target_ref", "requested_action", "scope", "expected_effects", "affected_parties", "risk", "privacy", "reversibility", "authorization_requirement", "authorization_refs", "evidence_plan", "acceptance_criteria", "stop_conditions", "idempotency_key"],
+          "properties": {
+            "record_type": {"const": "action_request"},
+            "correlation_id": {"type": "string"},
+            "objective": {"type": "string", "minLength": 1},
+            "target_ref": {"type": "object", "required": ["target_id", "target_type"], "properties": {"target_id": {"type": "string"}, "target_type": {"type": "string"}, "target_version": {"type": "string"}, "observed_state_ref": {"type": "string"}}, "additionalProperties": false},
+            "requested_action": {"type": "object", "required": ["action_type", "parameters_schema_ref"], "properties": {"action_type": {"type": "string"}, "parameters_schema_ref": {"type": "string"}}, "additionalProperties": false},
+            "scope": {"type": "object", "minProperties": 1},
+            "expected_effects": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "affected_parties": {"type": "array", "items": {"type": "object"}},
+            "risk": {"type": "object", "required": ["level", "factors", "cumulative_impact"], "properties": {"level": {"enum": ["low", "medium", "high", "critical", "unknown"]}, "factors": {"type": "array", "items": {"type": "string"}}, "cumulative_impact": {"type": "string"}}, "additionalProperties": false},
+            "privacy": {"type": "object", "required": ["data_classes", "external_exposure", "minimum_necessary_state"], "properties": {"data_classes": {"type": "array", "items": {"type": "string"}}, "external_exposure": {"type": "string"}, "minimum_necessary_state": {"type": "string"}}, "additionalProperties": false},
+            "reversibility": {"type": "object", "required": ["class", "rollback_ref", "recovery_point_ref"], "properties": {"class": {"enum": ["reversible", "partially_reversible", "hard_to_reverse", "unknown"]}, "rollback_ref": {"type": "string"}, "recovery_point_ref": {"type": "string"}}, "additionalProperties": false},
+            "authorization_requirement": {"type": "object", "required": ["required", "authority_type", "scope_requirements"], "properties": {"required": {"type": "boolean"}, "authority_type": {"type": "string"}, "scope_requirements": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": false},
+            "authorization_refs": {"type": "array", "items": {"type": "string"}},
+            "evidence_plan": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["claim_ref", "method_ref", "expected_evidence_type"], "properties": {"claim_ref": {"type": "string"}, "method_ref": {"type": "string"}, "expected_evidence_type": {"type": "string"}}, "additionalProperties": false}},
+            "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["criterion_id", "check_method_ref", "pass_condition"], "properties": {"criterion_id": {"type": "string"}, "check_method_ref": {"type": "string"}, "pass_condition": {"type": "string"}}, "additionalProperties": false}},
+            "stop_conditions": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["condition_id", "trigger", "required_response"], "properties": {"condition_id": {"type": "string"}, "trigger": {"type": "string"}, "required_response": {"type": "string"}}, "additionalProperties": false}},
+            "idempotency_key": {"type": "string", "minLength": 1}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "assessment_result": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["correlation_id", "action_ref", "evaluated_at", "valid_until", "target_state_ref", "governance_basis_refs", "authorization_evaluation", "risk_evaluation", "privacy_evaluation", "reversibility_evaluation", "evidence_plan_evaluation", "stop_condition_state", "assessment_outcome", "reason_codes", "unmet_conditions", "authorization_effect"],
+          "properties": {
+            "record_type": {"const": "assessment_result"},
+            "correlation_id": {"type": "string"}, "action_ref": {"type": "string"},
+            "evaluated_at": {"type": "string", "format": "date-time"}, "valid_until": {"type": "string", "format": "date-time"},
+            "target_state_ref": {"type": "string"},
+            "governance_basis_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "authorization_evaluation": {"$ref": "#/$defs/authorization_evaluation"},
+            "risk_evaluation": {"$ref": "#/$defs/evaluation"}, "privacy_evaluation": {"$ref": "#/$defs/evaluation"},
+            "reversibility_evaluation": {"$ref": "#/$defs/evaluation"}, "evidence_plan_evaluation": {"$ref": "#/$defs/evaluation"},
+            "stop_condition_state": {"enum": ["clear", "triggered", "unknown"]},
+            "assessment_outcome": {"enum": ["ready_for_execution", "needs_authorization", "needs_more_evidence", "blocked", "deny"]},
+            "reason_codes": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "unmet_conditions": {"type": "array", "items": {"type": "string"}},
+            "authorization_effect": {"const": "none"}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "execution_result": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["correlation_id", "action_ref", "assessment_ref", "authorization_refs", "idempotency_key", "executor_ref", "target_precondition_ref", "started_at", "execution_outcome", "runtime_state_refs", "side_effect_summary"],
+          "properties": {
+            "record_type": {"const": "execution_result"}, "correlation_id": {"type": "string"}, "action_ref": {"type": "string"}, "assessment_ref": {"type": "string"},
+            "authorization_refs": {"type": "array", "items": {"type": "string"}}, "idempotency_key": {"type": "string"},
+            "executor_ref": {"type": "string"}, "target_precondition_ref": {"type": "string"},
+            "started_at": {"type": "string", "format": "date-time"}, "ended_at": {"type": "string", "format": "date-time"},
+            "execution_outcome": {"enum": ["not_started", "executed_pending_verification", "failed", "stopped", "duplicate_suppressed"]},
+            "runtime_state_refs": {"type": "array", "items": {"type": "string"}},
+            "side_effect_summary": {"type": "array", "items": {"type": "string"}}, "error_ref": {"type": "string"}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "verification_result": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["correlation_id", "execution_ref", "verified_at", "criterion_results", "evidence_refs", "observed_state_refs", "verification_outcome", "stability_level", "rollback_required"],
+          "properties": {
+            "record_type": {"const": "verification_result"}, "correlation_id": {"type": "string"}, "execution_ref": {"type": "string"}, "verified_at": {"type": "string", "format": "date-time"},
+            "criterion_results": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["criterion_id", "result"], "properties": {"criterion_id": {"type": "string"}, "result": {"enum": ["pass", "fail", "partial", "inconclusive"]}}, "additionalProperties": false}},
+            "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "observed_state_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+            "verification_outcome": {"enum": ["verified", "partially_verified", "verification_failed", "inconclusive"]},
+            "stability_level": {"enum": ["single_observation", "repeated", "stably_verified", "unknown"]},
+            "decision_update_ref": {"type": "string"}, "rollback_required": {"type": "boolean"}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "contract_error": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["phase", "error_code", "message", "retryable", "related_refs", "safe_next_state"],
+          "properties": {
+            "record_type": {"const": "contract_error"},
+            "phase": {"enum": ["schema", "classification", "action", "assessment", "execution", "verification", "rollback", "manifest"]},
+            "error_code": {"enum": ["invalid_schema", "unsupported_version", "unknown_enum", "missing_required_evidence", "evidence_stale", "authorization_missing", "authorization_stale", "authorization_out_of_scope", "governance_conflict", "risk_unresolved", "privacy_boundary_violation", "target_drift", "stop_condition_met", "idempotency_conflict", "execution_failed", "verification_failed", "rollback_required", "internal_error"]},
+            "message": {"type": "string"}, "retryable": {"type": "boolean"}, "related_refs": {"type": "array", "items": {"type": "string"}},
+            "safe_next_state": {"enum": ["needs_more_evidence", "needs_authorization", "blocked", "deny", "stopped", "rollback_required"]}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}
