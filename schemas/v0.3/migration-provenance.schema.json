@@ -22,6 +22,7 @@
     "omitted_items": {"type": "array", "items": {"$ref": "#/$defs/omitted_item"}},
     "source_unchanged": {"type": "boolean"},
     "source_unchanged_evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "source_change_basis_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
     "migration_state": {"enum": ["not_migrated", "in_progress", "migrated", "needs_review", "not_applicable", "unknown"]},
     "runtime_validation_state": {"enum": ["not_run", "pending_verification", "verified", "failed", "stale", "unknown"]},
     "unresolved_conflicts": {"type": "array", "items": {"$ref": "#/$defs/conflict"}},
@@ -40,10 +41,21 @@
       "if": {"properties": {"migration_state": {"const": "migrated"}}},
       "then": {
         "properties": {
-          "source_unchanged": {"const": true},
           "mappings": {"minItems": 1},
           "unresolved_conflicts": {"maxItems": 0}
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_unchanged": {"const": false},
+          "migration_state": {"const": "migrated"}
+        }
+      },
+      "then": {
+        "required": ["source_change_basis_refs"],
+        "properties": {"source_change_basis_refs": {"minItems": 1}}
       }
     }
   ],

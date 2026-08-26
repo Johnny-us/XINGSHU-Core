@@ -45,6 +45,9 @@ def semantic_errors(record):
         errors.append("unknown_source_reference")
     if record["migration_state"] == "migrated" and record["unresolved_conflicts"]:
         errors.append("migrated_with_unresolved_conflict")
+    if record["migration_state"] == "migrated" and not record["source_unchanged"]:
+        if not record.get("source_change_basis_refs"):
+            errors.append("source_change_basis_missing")
     return errors
 
 
@@ -67,10 +70,15 @@ class MigrationProvenanceTests(unittest.TestCase):
     def test_unaccounted_source_is_rejected(self):
         self.assertEqual("rejected", evaluate(load("migration-drops-source-without-provenance-invalid.json")))
 
-    def test_migrated_record_requires_unchanged_source(self):
-        record = load("migrated-but-runtime-unverified-valid.json")
-        record["source_unchanged"] = False
-        self.assertEqual("rejected", evaluate(record))
+    def test_source_change_without_external_basis_is_rejected(self):
+        self.assertEqual("rejected", evaluate(load("migrated-source-change-without-basis-invalid.json")))
+
+    def test_source_change_with_external_basis_is_valid_without_authorization_effect(self):
+        record = load("migrated-source-change-with-basis-valid.json")
+        self.assertEqual("accepted", evaluate(record))
+        self.assertFalse(record["source_unchanged"])
+        self.assertTrue(record["source_change_basis_refs"])
+        self.assertEqual("none", record["authorization_effect"])
 
     def test_unknown_migration_state_fails_closed(self):
         record = load("migrated-but-runtime-unverified-valid.json")

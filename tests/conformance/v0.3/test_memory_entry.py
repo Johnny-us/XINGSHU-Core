@@ -77,6 +77,12 @@ class MemoryEntryTests(unittest.TestCase):
     def test_reasoned_inference_requires_promotion_review(self):
         self.assertEqual("rejected", evaluate(load("reasoned-inference-promoted-without-review-invalid.json")))
 
+    def test_low_risk_reasoned_inference_can_use_approved_automated_review(self):
+        record = load("reasoned-inference-automated-reviewed-low-risk-valid.json")
+        self.assertEqual([], list(VALIDATOR.iter_errors(record)))
+        self.assertEqual("automated", record["promotion_review"]["reviewer_type"])
+        self.assertEqual("current_valid", evaluate(record))
+
     def test_historical_conclusion_cannot_load_as_current(self):
         self.assertEqual("rejected", evaluate(load("historical-conclusion-loaded-as-current-invalid.json")))
 

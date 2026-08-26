@@ -6,6 +6,7 @@ target_topic_ref: topic-example
 migration_state: in_progress
 runtime_validation_state: not_run
 source_unchanged: true
+source_change_basis_refs: []
 governance_effect: none
 activation_state: not_active
 ---
@@ -49,7 +50,10 @@ activation_state: not_active
 
 - 是否保持源材料不变：`true`
 - 只读 / 前后校验证据：
+- 若源材料发生合法变化，外部依据引用：无 / 填写匿名 Authorization、审计或正当依据引用
 - 是否获得删除源材料授权：否
+
+`source_change_basis_refs` 只记录外部依据引用，不保存授权正文，也不由本记录产生 Authorization；`authorization_effect` 保持 `none`。
 
 ## 独立状态
 

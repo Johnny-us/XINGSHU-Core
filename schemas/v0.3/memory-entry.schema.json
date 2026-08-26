@@ -59,19 +59,6 @@
     {
       "if": {"properties": {"conclusion_state": {"const": "superseded"}}},
       "then": {"properties": {"relationships": {"properties": {"superseded_by": {"minItems": 1}}}}}
-    },
-    {
-      "if": {
-        "properties": {
-          "conclusion_state": {"const": "active"},
-          "evidence_types": {"contains": {"const": "reasoned_inference"}}
-        }
-      },
-      "then": {
-        "properties": {
-          "promotion_review": {"properties": {"reviewer_type": {"enum": ["human", "professional", "mixed"]}}}
-        }
-      }
     }
   ],
   "additionalProperties": false,

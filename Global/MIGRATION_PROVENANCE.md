@@ -30,7 +30,7 @@ visibility: public
 3. **Mapping（映射）**：每个来源或来源片段映射到目标 `main`、`appendix` 或 `provenance` 的哪个部分；
 4. **Merge / Dedup Decisions（合并 / 去重决定）**：记录重复内容如何合并、采用哪个依据以及保留哪些差异；
 5. **Omitted Items（未迁移项）**：每个被省略的来源或片段必须有原因，例如重复、失效、超出范围、隐私边界或无法核实；
-6. **Source Unchanged（源材料未变）**：明确迁移是否以复制或只读方式进行；无法证明时不得声明 `true`；
+6. **Source Change Control（源材料变更控制）**：明确源材料是否保持不变；若保持不变，引用只读流程或完整性证据；若合法迁移需要改变来源，引用外部授权、审计或其他正当依据，但不复制 Authorization Payload（授权载荷）；
 7. **Independent States（独立状态）**：分别记录 `migration_state` 与 `runtime_validation_state`；
 8. **Conflicts（冲突）**：记录尚未解决的版本、平台、范围或结论冲突，以及安全的下一状态；
 9. **Relationships（关系）**：目标对象、来源对象、替代关系和相关 Evidence 的引用。
@@ -71,6 +71,8 @@ runtime_validation_state: pending_verification
 - 默认以复制、只读读取或内容寻址的方式迁移；
 - 不在迁移过程中顺手修正源库；源材料中的错误应在目标取舍或冲突记录中说明；
 - `source_unchanged: true` 必须有可复核依据，例如只读流程、前后哈希或受控快照；
+- `source_unchanged: false` 且迁移标记为 `migrated` 时，必须通过 `source_change_basis_refs` 引用外部授权、审计记录或其他正当变更依据；引用只证明依据可追溯，不由 Migration Provenance 自行创造 Authorization（授权）；
+- `source_change_basis_refs` 只保存匿名 Metadata 引用，不保存真实授权正文、凭据或其他私人 Payload；`authorization_effect` 始终为 `none`；
 - 未取得删除授权时，不因目标迁移成功而删除、改名或覆盖来源；
 - Derived View（派生视图）不能反向覆盖 Source（源对象）。
 

@@ -105,7 +105,7 @@ AI 生成、改写、总结、推断、转换或从历史资料中抽取的内�
 12. 是否存在地区、客户、患者、市场、软件版本或其他适用范围限制；
 13. 是否涉及版权、许可、公开、第三方 AI 处理、训练或再授权限制。
 
-验收记录至少应引用 Source（来源）、Last Verified（最后核实时间）、Environment Class（环境类别）、已知冲突、Review Trigger（复审触发条件）和 Replacement（替代关系，若适用）。`reasoned_inference`（基于证据的推断）必须明确标记，并经独立的 Promotion Review 后才能成为 `active`；推断本身不是验证。
+验收记录至少应引用 Source（来源）、Last Verified（最后核实时间）、Environment Class（环境类别）、已知冲突、Review Trigger（复审触发条件）和 Replacement（替代关系，若适用）。`reasoned_inference`（基于证据的推断）必须明确标记，并经独立的 Promotion Review 后才能成为 `active`；推断本身不是验证。Review（审核）的强度与 Reviewer（审核者）类型按适用风险和领域要求决定：低风险、已核实且可回退的推断可以使用 `automated` 审核；高影响、受保护动作或专业领域可以要求 `human`、`professional` 或 `mixed` 审核。Promotion Review 只决定知识晋升，不产生现实动作 Authorization（授权）。
 
 通用证据类别包括 `runtime_test`、`official_documentation`、`source_code`、`external_source`、`reasoned_inference`、`subject_confirmation`、`professional_verification` 和 `other`。确认类证据使用 `subject_confirmation` 表示对正确主体的确认，不把任何特定用户写进公共枚举。
 
