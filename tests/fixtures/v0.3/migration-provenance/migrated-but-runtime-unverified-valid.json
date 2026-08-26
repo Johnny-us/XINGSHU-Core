@@ -1,0 +1,58 @@
+{
+  "schema_version": "0.3",
+  "record_type": "migration_provenance",
+  "record_id": "record:migration:001",
+  "created_at": "2026-03-01T00:00:00Z",
+  "migration_id": "migration:synthetic:001",
+  "target_topic_ref": "topic:synthetic-migration",
+  "source_inventory": [
+    {
+      "source_id": "source-001",
+      "source_class": "historical_record",
+      "source_ref": "source:synthetic:001",
+      "captured_at": "2026-02-28T00:00:00Z",
+      "integrity": {"algorithm": "sha256", "digest": "1111111111111111111111111111111111111111111111111111111111111111"}
+    },
+    {
+      "source_id": "source-002",
+      "source_class": "formal_knowledge",
+      "source_ref": "source:synthetic:002",
+      "captured_at": "2026-02-28T00:00:00Z",
+      "integrity": {"algorithm": "sha256", "digest": "2222222222222222222222222222222222222222222222222222222222222222"}
+    }
+  ],
+  "mappings": [
+    {
+      "source_id": "source-001",
+      "target_object_ref": "knowledge:synthetic-main",
+      "target_section": "Reusable procedure",
+      "decision": "merged",
+      "reason": "The reusable conclusion belongs in the main object."
+    }
+  ],
+  "omitted_items": [
+    {
+      "source_id": "source-002",
+      "reason_code": "duplicate",
+      "reason": "The second source duplicates the mapped conclusion.",
+      "covered_by_ref": "knowledge:synthetic-main"
+    }
+  ],
+  "source_unchanged": true,
+  "source_unchanged_evidence_refs": ["evidence:synthetic:readonly-copy"],
+  "migration_state": "migrated",
+  "runtime_validation_state": "pending_verification",
+  "unresolved_conflicts": [],
+  "relationships": {
+    "target_main_ref": "knowledge:synthetic-main",
+    "appendix_refs": ["knowledge:synthetic-appendix"],
+    "provenance_refs": ["knowledge:synthetic-provenance"],
+    "evidence_refs": ["evidence:synthetic:readonly-copy"],
+    "supersedes": [],
+    "superseded_by": []
+  },
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

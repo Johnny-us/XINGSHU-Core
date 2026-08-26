@@ -3,9 +3,11 @@ type: public-documentation
 system: xingshu-2.0
 scope: public-core
 status: candidate
-version: 0.1
-updated: 2026-08-25
+version: 0.3-candidate
+updated: 2026-08-26
 governed_by: Global/00_GLOBAL_GOVERNANCE.md
+governance_effect: none
+activation_state: not_active
 visibility: public
 ---
 
@@ -76,3 +78,31 @@ visibility: public
 ## Capability Manifest（能力清单）
 
 为 Consumer（消费者）提供版本、候选能力、Schema、测试、兼容和回退引用的机器可读入口。Manifest 声明不等于启用、采用、治理生效或授权。
+
+## Memory Candidate（记忆候选）
+
+从来源或事件中提取、但尚未完成来源核实、去重 / 冲突审查和晋升审查的候选结论。Memory Candidate 不是正式记忆，也不是聊天压缩结果。
+
+## Conclusion State（结论状态）
+
+表示结论处于 `candidate`、`reviewed`、`active`、`needs_review`、`superseded`、`deprecated` 或 `historical` 的知识生命周期状态。它与 Evidence State（证据状态）分开维护。
+
+## Knowledge Object（知识对象）
+
+围绕一个主题与作用域组织的知识单元。一个完整 Knowledge Object 可以包含一个 `main`、多个 `appendix` 和 `provenance`，但只能有一个当前正式入口。
+
+## Document Role（文档角色）
+
+Knowledge Object 中的职责：`main` 是唯一正式入口，`appendix` 保存大型清单或技术材料，`provenance` 保存来源、迁移、取舍与历史。附录和溯源对象不构成第二 Source of Truth。
+
+## Derived View（派生视图）
+
+从一个或多个 Source 生成的索引、摘要、投影或展示。Derived View 应可重新生成，不得覆盖或反向改写 Source。
+
+## Migration Provenance（迁移溯源）
+
+记录来源清单、映射、合并 / 去重、遗漏原因、源材料保护、冲突和目标关系的迁移元数据。它不证明运行已经验证，也不授予删除来源、执行、公开或采用权限。
+
+## Independent Knowledge States（独立知识状态）
+
+`document_state` 表示文档成熟度，`migration_state` 表示迁移完成度，`runtime_validation_state` 表示目标环境中的运行验证结果。三者不得互相推导；`migrated` 不等于 `verified`。

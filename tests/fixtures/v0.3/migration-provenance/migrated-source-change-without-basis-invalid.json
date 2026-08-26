@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.3",
+  "record_type": "migration_provenance",
+  "record_id": "record:migration:004",
+  "created_at": "2026-03-04T00:00:00Z",
+  "migration_id": "migration:synthetic:004",
+  "target_topic_ref": "topic:synthetic-source-change",
+  "source_inventory": [
+    {
+      "source_id": "source-202",
+      "source_class": "formal_knowledge",
+      "source_ref": "source:synthetic:202",
+      "captured_at": "2026-03-03T00:00:00Z"
+    }
+  ],
+  "mappings": [
+    {
+      "source_id": "source-202",
+      "target_object_ref": "knowledge:synthetic-source-change",
+      "target_section": "Unjustified source change",
+      "decision": "copied",
+      "reason": "The record claims a source change but provides no external basis reference."
+    }
+  ],
+  "omitted_items": [],
+  "source_unchanged": false,
+  "source_unchanged_evidence_refs": [],
+  "migration_state": "migrated",
+  "runtime_validation_state": "pending_verification",
+  "unresolved_conflicts": [],
+  "relationships": {
+    "target_main_ref": "knowledge:synthetic-source-change",
+    "appendix_refs": [],
+    "provenance_refs": ["knowledge:synthetic-source-change-provenance"],
+    "evidence_refs": [],
+    "supersedes": [],
+    "superseded_by": []
+  },
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

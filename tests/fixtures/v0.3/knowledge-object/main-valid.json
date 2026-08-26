@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.3",
+  "record_type": "knowledge_object",
+  "record_id": "record:knowledge:001",
+  "created_at": "2026-02-01T00:00:00Z",
+  "object_id": "knowledge:synthetic-main",
+  "topic_ref": "topic:synthetic-knowledge",
+  "document_role": "main",
+  "origin_form": "source",
+  "document_state": "active",
+  "migration_state": "not_applicable",
+  "runtime_validation_state": "pending_verification",
+  "scope": {
+    "scope_type": "global",
+    "environment_class": "document_review",
+    "platform": "platform_neutral",
+    "version_constraints": ["synthetic-v1"]
+  },
+  "summary": "A synthetic main object links its required appendix and provenance.",
+  "source_refs": ["source:synthetic:knowledge"],
+  "evidence_refs": ["evidence:synthetic:knowledge"],
+  "relationships": {
+    "appendix_refs": ["knowledge:synthetic-appendix"],
+    "provenance_refs": ["knowledge:synthetic-provenance"],
+    "derived_from": [],
+    "supersedes": [],
+    "superseded_by": []
+  },
+  "source_of_truth": true,
+  "write_back_to_source": false,
+  "current_loading_allowed": true,
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}

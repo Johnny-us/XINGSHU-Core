@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:v0.3:knowledge-object",
+  "title": "XINGSHU Core v0.3 Knowledge Object",
+  "type": "object",
+  "required": [
+    "schema_version", "record_type", "record_id", "created_at", "object_id", "topic_ref",
+    "document_role", "origin_form", "document_state", "migration_state",
+    "runtime_validation_state", "scope", "summary", "source_refs", "evidence_refs",
+    "relationships", "source_of_truth", "write_back_to_source", "current_loading_allowed",
+    "privacy", "authorization_effect", "governance_effect", "activation_state"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3"},
+    "record_type": {"const": "knowledge_object"},
+    "record_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "object_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "topic_ref": {"type": "string", "minLength": 1, "maxLength": 256},
+    "document_role": {"enum": ["main", "appendix", "provenance"]},
+    "origin_form": {"enum": ["source", "derived_view"]},
+    "document_state": {"enum": ["candidate", "reviewed", "active", "needs_review", "superseded", "deprecated", "historical"]},
+    "migration_state": {"enum": ["not_migrated", "in_progress", "migrated", "needs_review", "not_applicable", "unknown"]},
+    "runtime_validation_state": {"enum": ["not_run", "pending_verification", "verified", "failed", "stale", "unknown"]},
+    "scope": {"$ref": "#/$defs/scope"},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "source_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "relationships": {"$ref": "#/$defs/relationships"},
+    "source_of_truth": {"type": "boolean"},
+    "write_back_to_source": {"type": "boolean"},
+    "current_loading_allowed": {"type": "boolean"},
+    "reuse_claim": {"$ref": "#/$defs/reuse_claim"},
+    "privacy": {"$ref": "#/$defs/privacy"},
+    "authorization_effect": {"const": "none"},
+    "governance_effect": {"const": "none"},
+    "activation_state": {"const": "not_active"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"document_role": {"const": "main"}}},
+      "then": {"properties": {"source_of_truth": {"const": true}}}
+    },
+    {
+      "if": {"properties": {"document_role": {"enum": ["appendix", "provenance"]}}},
+      "then": {
+        "properties": {
+          "source_of_truth": {"const": false},
+          "relationships": {"required": ["main_ref"], "properties": {"main_ref": {"type": "string", "minLength": 1}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"origin_form": {"const": "derived_view"}}},
+      "then": {
+        "properties": {
+          "source_of_truth": {"const": false},
+          "write_back_to_source": {"const": false},
+          "relationships": {"properties": {"derived_from": {"minItems": 1}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"document_state": {"enum": ["superseded", "deprecated", "historical"]}}},
+      "then": {"properties": {"current_loading_allowed": {"const": false}}}
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "scope": {
+      "type": "object",
+      "required": ["scope_type", "environment_class", "platform", "version_constraints"],
+      "properties": {
+        "scope_type": {"enum": ["task", "project", "domain", "instance", "provider", "device_class", "global", "other"]},
+        "scope_ref": {"type": "string", "minLength": 1, "maxLength": 256},
+        "environment_class": {"enum": ["not_applicable", "isolated_test", "local_runtime", "remote_service", "document_review", "other", "unknown"]},
+        "platform": {"enum": ["platform_neutral", "macos", "windows", "linux", "web", "mobile", "other", "unknown"]},
+        "version_constraints": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 128}}
+      },
+      "additionalProperties": false
+    },
+    "relationships": {
+      "type": "object",
+      "required": ["appendix_refs", "provenance_refs", "derived_from", "supersedes", "superseded_by"],
+      "properties": {
+        "main_ref": {"type": "string", "minLength": 1, "maxLength": 256},
+        "appendix_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "provenance_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "derived_from": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "supersedes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "superseded_by": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}}
+      },
+      "additionalProperties": false
+    },
+    "reuse_claim": {
+      "type": "object",
+      "required": ["origin_platform", "target_platform", "scope_match", "local_path_reused"],
+      "properties": {
+        "origin_platform": {"enum": ["platform_neutral", "macos", "windows", "linux", "web", "mobile", "other", "unknown"]},
+        "target_platform": {"enum": ["platform_neutral", "macos", "windows", "linux", "web", "mobile", "other", "unknown"]},
+        "scope_match": {"enum": ["match", "mismatch", "unknown", "not_applicable"]},
+        "local_path_reused": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "privacy": {
+      "type": "object",
+      "required": ["payload_handling", "sensitive_data_included"],
+      "properties": {
+        "payload_handling": {"enum": ["metadata_only", "external_private", "redacted", "synthetic_public"]},
+        "sensitive_data_included": {"const": false}
+      },
+      "additionalProperties": false
+    }
+  }
+}

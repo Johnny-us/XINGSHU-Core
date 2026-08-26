@@ -76,3 +76,53 @@ capabilities:
     authorization_effect: none
     activation_effect: none
     rollback_behavior: disable_capability_and_restore_v0_1_interpretation
+  knowledge_memory_lifecycle:
+    version: "0.3"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/KNOWLEDGE_LIFECYCLE.md
+    schema_refs:
+      - schemas/v0.3/memory-entry.schema.json
+    test_refs:
+      - tests/conformance/v0.3/test_memory_entry.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies:
+      evidence_lifecycle: ">=0.2"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_ignore_v0_3_memory_entries
+  knowledge_object_model:
+    version: "0.3"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/KNOWLEDGE_OBJECT_MODEL.md
+    schema_refs:
+      - schemas/v0.3/knowledge-object.schema.json
+    test_refs:
+      - tests/conformance/v0.3/test_knowledge_object.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies: {}
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_ignore_v0_3_knowledge_objects
+  migration_provenance:
+    version: "0.3"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/MIGRATION_PROVENANCE.md
+    schema_refs:
+      - schemas/v0.3/migration-provenance.schema.json
+    test_refs:
+      - tests/conformance/v0.3/test_migration_provenance.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies:
+      knowledge_object_model: ">=0.3"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_ignore_v0_3_migration_records

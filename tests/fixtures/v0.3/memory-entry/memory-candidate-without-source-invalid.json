@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.3",
+  "record_type": "memory_entry",
+  "record_id": "record:memory:002",
+  "created_at": "2026-01-11T00:00:00Z",
+  "memory_id": "memory:candidate:002",
+  "topic_ref": "topic:synthetic-candidate",
+  "scope": {
+    "scope_type": "global",
+    "environment_class": "document_review",
+    "platform": "platform_neutral",
+    "version_constraints": ["synthetic-v1"]
+  },
+  "conclusion_state": "candidate",
+  "conclusion_summary": "A source-free candidate must not become formal memory.",
+  "source_refs": [],
+  "source_verification": {
+    "status": "unknown",
+    "environment_class": "unknown",
+    "method_refs": ["method:unavailable"]
+  },
+  "dedup_conflict_review": {
+    "status": "unknown",
+    "duplicate_refs": [],
+    "conflict_refs": [],
+    "reason_codes": ["source_missing"]
+  },
+  "promotion_review": {
+    "status": "pending",
+    "reviewer_type": "unknown",
+    "reason_codes": ["source_missing"]
+  },
+  "evidence_types": ["other"],
+  "evidence_refs": [],
+  "evidence_state": "unknown",
+  "review_triggers": [
+    {"trigger_type": "manual_review_required", "condition": "A traceable source becomes available."}
+  ],
+  "relationships": {"supersedes": [], "superseded_by": [], "derived_from": [], "related_knowledge_refs": []},
+  "current_loading_allowed": false,
+  "privacy": {"payload_handling": "synthetic_public", "sensitive_data_included": false},
+  "authorization_effect": "none",
+  "governance_effect": "none",
+  "activation_state": "not_active"
+}
