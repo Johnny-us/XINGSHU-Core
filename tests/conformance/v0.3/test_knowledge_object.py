@@ -60,6 +60,12 @@ class KnowledgeObjectTests(unittest.TestCase):
     def test_derived_view_cannot_overwrite_source(self):
         self.assertEqual("rejected", evaluate(load("derived-view-overwrites-source-invalid.json")))
 
+    def test_derived_view_cannot_be_source_of_truth(self):
+        record = load("main-valid.json")
+        record["origin_form"] = "derived_view"
+        record["relationships"]["derived_from"] = ["knowledge:synthetic-source"]
+        self.assertEqual("rejected", evaluate(record))
+
     def test_appendix_cannot_be_second_source_of_truth(self):
         self.assertEqual("rejected", evaluate(load("appendix-becomes-second-source-of-truth-invalid.json")))
 

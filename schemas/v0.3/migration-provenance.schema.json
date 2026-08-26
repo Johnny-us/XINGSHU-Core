@@ -35,6 +35,16 @@
     {
       "if": {"properties": {"source_unchanged": {"const": true}}},
       "then": {"properties": {"source_unchanged_evidence_refs": {"minItems": 1}}}
+    },
+    {
+      "if": {"properties": {"migration_state": {"const": "migrated"}}},
+      "then": {
+        "properties": {
+          "source_unchanged": {"const": true},
+          "mappings": {"minItems": 1},
+          "unresolved_conflicts": {"maxItems": 0}
+        }
+      }
     }
   ],
   "additionalProperties": false,

@@ -54,6 +54,7 @@
       "if": {"properties": {"origin_form": {"const": "derived_view"}}},
       "then": {
         "properties": {
+          "source_of_truth": {"const": false},
           "write_back_to_source": {"const": false},
           "relationships": {"properties": {"derived_from": {"minItems": 1}}}
         }

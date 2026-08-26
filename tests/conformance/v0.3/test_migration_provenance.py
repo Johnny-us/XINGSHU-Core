@@ -67,6 +67,11 @@ class MigrationProvenanceTests(unittest.TestCase):
     def test_unaccounted_source_is_rejected(self):
         self.assertEqual("rejected", evaluate(load("migration-drops-source-without-provenance-invalid.json")))
 
+    def test_migrated_record_requires_unchanged_source(self):
+        record = load("migrated-but-runtime-unverified-valid.json")
+        record["source_unchanged"] = False
+        self.assertEqual("rejected", evaluate(record))
+
     def test_unknown_migration_state_fails_closed(self):
         record = load("migrated-but-runtime-unverified-valid.json")
         record["migration_state"] = "mostly_done"
