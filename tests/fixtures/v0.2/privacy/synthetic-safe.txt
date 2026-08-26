@@ -1,0 +1,1 @@
+This synthetic fixture contains public test words only and expects no scanner finding.

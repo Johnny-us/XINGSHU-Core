@@ -1,0 +1,1 @@
+{"schema_version":"0.2","record_type":"contract_error","record_id":"error-idempotency-conflict","created_at":"2026-01-01T00:03:00Z","phase":"execution","error_code":"idempotency_conflict","message":"The synthetic key refers to a different action summary.","retryable":false,"related_refs":["action:synthetic-a","action:synthetic-b"],"safe_next_state":"blocked"}

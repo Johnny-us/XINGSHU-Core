@@ -1,0 +1,1 @@
+{"schema_version":"0.2","record_type":"evidence_metadata","payload":{"synthetic":"must-be-rejected"},"expected_error":"privacy_boundary_violation"}

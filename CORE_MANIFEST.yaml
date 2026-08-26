@@ -1,0 +1,78 @@
+manifest_version: "0.2"
+system_id: xingshu-core
+release_stage: candidate
+governance_effect: none
+activation_state: not_active
+baseline:
+  tag: v0.1.0-candidate
+  commit: 5a110478cb731ad02769949ac72b60c1a4a76557
+  tree: a22196d91ebcd343150ee4e5bd79765e4fa022e2
+schema_dialect: https://json-schema.org/draft/2020-12/schema
+unknown_capability_behavior: ignore_if_disabled_fail_closed_if_requested
+capabilities:
+  state_separation:
+    version: "0.2"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/STATE_SEPARATION_ARCHITECTURE.md
+    schema_refs:
+      - schemas/v0.2/state-separation.schema.json
+    test_refs:
+      - tests/conformance/v0.2/test_state_separation.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies: {}
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_restore_v0_1_interpretation
+  evidence_lifecycle:
+    version: "0.2"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/EVIDENCE_LIFECYCLE.md
+    schema_refs:
+      - schemas/v0.2/evidence-lifecycle.schema.json
+    test_refs:
+      - tests/conformance/v0.2/test_evidence_lifecycle.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies: {}
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_restore_v0_1_interpretation
+  evidence_proportional_adoption:
+    version: "0.2"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/EVIDENCE_PROPORTIONAL_ADOPTION_POLICY.md
+    schema_refs: []
+    test_refs:
+      - tests/conformance/v0.2/test_evidence_proportional_adoption.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies:
+      evidence_lifecycle: ">=0.2"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_restore_v0_1_interpretation
+  pre_execution_assessment:
+    version: "0.2"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: Global/PRE_EXECUTION_ASSESSMENT_CONTRACT.md
+    schema_refs:
+      - schemas/v0.2/pre-execution-assessment.schema.json
+    test_refs:
+      - tests/conformance/v0.2/test_pre_execution_assessment.py
+      - tests/compatibility/v0.1-v0.2/test_compatibility.py
+    dependencies:
+      state_separation: ">=0.2"
+      evidence_lifecycle: ">=0.2"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_restore_v0_1_interpretation
