@@ -2,6 +2,43 @@
 
 XINGSHU Core 是 XINGSHU 2.0 的 Open Source Core（开源核心），用于承载平台无关、实例无关且可公开复用的治理原则、稳定契约与基础结构。
 
+## Install（安装）
+
+当前 v0.4 Candidate（候选）正式支持从 Git Checkout（仓库检出目录）进行 Editable Install（可编辑安装）：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+```
+
+要求 Python 3.11 或更高版本。安装只依赖 `jsonschema>=4.23,<5`。
+
+## Run（运行）
+
+```bash
+xingshu --version
+xingshu doctor
+```
+
+预期版本输出：
+
+```text
+XINGSHU-Core 0.4.0.dev0
+```
+
+`doctor` 在本地检查 Python、`jsonschema`、Repository / Schema Root（仓库 / Schema 根）、三个 v0.3 Schema 和 Manifest；它不会联网。
+
+## Validate（验证）
+
+```bash
+xingshu validate examples/v0.4/memory-valid.json
+xingshu validate examples/v0.4/memory-needs-review.json
+xingshu validate examples/v0.4/migration-valid.json --json
+```
+
+第一条返回 `PASS` 和退出码 `0`；第二条返回 `NEEDS_REVIEW` 和退出码 `2`。完整命令、Decision（决定）与退出码参见 [Validator CLI](docs/CLI.md)。Validator（验证器）只读输入，不会修改 JSON、写入记忆、联网或执行外部动作。
+
 ## 项目简介
 
 XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可验证运行和长期可迁移性为基础的 AI Governance（人工智能治理）框架。Core 关注能够服务不同 System Owner（系统所有者）的公共能力，不绑定特定个人、设备、账号、路径或私人项目。
@@ -27,16 +64,17 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## 当前阶段
 
-本分支包含 XINGSHU-Core v0.3 Candidate（公共核心 v0.3 候选）。它在完整保留 v0.2 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约）的基础上，新增 Knowledge / Memory（知识 / 记忆）候选能力：
+本分支包含 XINGSHU-Core v0.4 Runnable Core / Validator CLI Candidate（可运行核心 / 验证器命令行候选）。它保留 v0.2 与 v0.3 的治理、Schema 和兼容语义，并首次提供可安装、可执行的只读软件：
 
 - Memory Distillation（记忆提炼）与事件触发复审；
 - Knowledge Object Model（知识对象模型）的 `main / appendix / provenance` 角色；
 - Migration Provenance（迁移溯源）以及迁移完成与运行验证分离；
 - 三个 v0.3 JSON Schema、可复制模板、合成失败夹具和匿名迁移案例。
+- `xingshu` CLI、统一 Validation Result（验证结果）、Schema Registry（Schema 注册表）和三个合成 Examples（示例）。
 
-所有 v0.2 与 v0.3 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
+所有 v0.2、v0.3 与 v0.4 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。用户显式运行 CLI 只表示执行一次只读验证，不等于 Governance Activation（治理激活）、Adoption（采用）或 Personal Instance（私人实例）自动接入。v0.1 语义与恢复基线保持不变。
 
-## Quick Start（快速开始）
+## Personal Instance Start（私人实例接入）
 
 1. 阅读 [Getting Started（开始使用）](docs/GETTING_STARTED.md)；
 2. 选择明确的 Core 版本并确认其治理状态；
@@ -59,6 +97,8 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [v0.1 → v0.2 Migration](docs/V0_1_TO_V0_2_MIGRATION.md) | 增量兼容、默认关闭与回退路径 |
 | [v0.2 Change Notes](docs/V0_2_CHANGE_NOTES.md) | v0.2 候选范围、状态与不包含项 |
 | [v0.3 Change Notes](docs/V0_3_CHANGE_NOTES.md) | v0.3 知识 / 记忆候选范围与兼容边界 |
+| [Validator CLI](docs/CLI.md) | 安装、命令、输出、退出码和只读边界 |
+| [v0.4 Change Notes](docs/V0_4_CHANGE_NOTES.md) | 可运行验证器候选范围、测试与限制 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
