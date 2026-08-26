@@ -6,6 +6,8 @@ status: candidate
 version: 0.3-candidate
 updated: 2026-08-26
 governed_by: Global/00_GLOBAL_GOVERNANCE.md
+governance_effect: none
+activation_state: not_active
 visibility: public
 ---
 
