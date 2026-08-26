@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:v0.3:memory-entry",
+  "title": "XINGSHU Core v0.3 Memory Entry",
+  "type": "object",
+  "required": [
+    "schema_version", "record_type", "record_id", "created_at", "memory_id",
+    "topic_ref", "scope", "conclusion_state", "conclusion_summary", "source_refs",
+    "source_verification", "dedup_conflict_review", "promotion_review", "evidence_types",
+    "evidence_refs", "evidence_state", "review_triggers", "relationships",
+    "current_loading_allowed", "privacy", "authorization_effect", "governance_effect",
+    "activation_state"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3"},
+    "record_type": {"const": "memory_entry"},
+    "record_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "memory_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "topic_ref": {"type": "string", "minLength": 1, "maxLength": 256},
+    "scope": {"$ref": "#/$defs/scope"},
+    "conclusion_state": {"enum": ["candidate", "reviewed", "active", "needs_review", "superseded", "deprecated", "historical"]},
+    "conclusion_summary": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "source_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "source_verification": {"$ref": "#/$defs/source_verification"},
+    "dedup_conflict_review": {"$ref": "#/$defs/dedup_conflict_review"},
+    "promotion_review": {"$ref": "#/$defs/promotion_review"},
+    "evidence_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["runtime_test", "official_documentation", "source_code", "external_source", "reasoned_inference", "subject_confirmation", "professional_verification", "other"]}
+    },
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "evidence_state": {"enum": ["current", "stale", "superseded", "corrected", "historical", "invalid", "unknown"]},
+    "review_triggers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/review_trigger"}},
+    "relationships": {"$ref": "#/$defs/relationships"},
+    "current_loading_allowed": {"type": "boolean"},
+    "privacy": {"$ref": "#/$defs/privacy"},
+    "authorization_effect": {"const": "none"},
+    "governance_effect": {"const": "none"},
+    "activation_state": {"const": "not_active"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"conclusion_state": {"const": "active"}}},
+      "then": {
+        "properties": {
+          "source_verification": {"properties": {"status": {"const": "verified"}}, "required": ["last_verified"]},
+          "dedup_conflict_review": {"properties": {"status": {"enum": ["clear", "merged"]}}},
+          "promotion_review": {"properties": {"status": {"const": "approved"}}, "required": ["reviewed_at"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"conclusion_state": {"enum": ["superseded", "deprecated", "historical"]}}},
+      "then": {"properties": {"current_loading_allowed": {"const": false}}}
+    },
+    {
+      "if": {"properties": {"conclusion_state": {"const": "superseded"}}},
+      "then": {"properties": {"relationships": {"properties": {"superseded_by": {"minItems": 1}}}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "conclusion_state": {"const": "active"},
+          "evidence_types": {"contains": {"const": "reasoned_inference"}}
+        }
+      },
+      "then": {
+        "properties": {
+          "promotion_review": {"properties": {"reviewer_type": {"enum": ["human", "professional", "mixed"]}}}
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "scope": {
+      "type": "object",
+      "required": ["scope_type", "environment_class", "platform", "version_constraints"],
+      "properties": {
+        "scope_type": {"enum": ["task", "project", "domain", "instance", "provider", "device_class", "global", "other"]},
+        "scope_ref": {"type": "string", "minLength": 1, "maxLength": 256},
+        "environment_class": {"enum": ["not_applicable", "isolated_test", "local_runtime", "remote_service", "document_review", "other", "unknown"]},
+        "platform": {"enum": ["platform_neutral", "macos", "windows", "linux", "web", "mobile", "other", "unknown"]},
+        "version_constraints": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 128}}
+      },
+      "additionalProperties": false
+    },
+    "source_verification": {
+      "type": "object",
+      "required": ["status", "environment_class", "method_refs"],
+      "properties": {
+        "status": {"enum": ["verified", "needs_review", "rejected", "unknown"]},
+        "last_verified": {"type": "string", "format": "date-time"},
+        "environment_class": {"enum": ["not_applicable", "isolated_test", "local_runtime", "remote_service", "document_review", "other", "unknown"]},
+        "method_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 256}}
+      },
+      "additionalProperties": false
+    },
+    "dedup_conflict_review": {
+      "type": "object",
+      "required": ["status", "duplicate_refs", "conflict_refs", "reason_codes"],
+      "properties": {
+        "status": {"enum": ["clear", "merged", "conflict", "needs_review", "unknown"]},
+        "duplicate_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "conflict_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "reason_codes": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"}}
+      },
+      "additionalProperties": false
+    },
+    "promotion_review": {
+      "type": "object",
+      "required": ["status", "reviewer_type", "reason_codes"],
+      "properties": {
+        "status": {"enum": ["pending", "approved", "rejected", "needs_review"]},
+        "reviewer_type": {"enum": ["automated", "human", "professional", "mixed", "unknown"]},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "reason_codes": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"}}
+      },
+      "additionalProperties": false
+    },
+    "review_trigger": {
+      "type": "object",
+      "required": ["trigger_type", "condition"],
+      "properties": {
+        "trigger_type": {"enum": ["version_changed", "execution_failed", "evidence_stale", "environment_changed", "source_changed", "scope_changed", "conflict_found", "replacement_available", "dependency_changed", "manual_review_required"]},
+        "condition": {"type": "string", "minLength": 1, "maxLength": 500}
+      },
+      "additionalProperties": false
+    },
+    "relationships": {
+      "type": "object",
+      "required": ["supersedes", "superseded_by", "derived_from", "related_knowledge_refs"],
+      "properties": {
+        "supersedes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "superseded_by": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "derived_from": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+        "related_knowledge_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}}
+      },
+      "additionalProperties": false
+    },
+    "privacy": {
+      "type": "object",
+      "required": ["payload_handling", "sensitive_data_included"],
+      "properties": {
+        "payload_handling": {"enum": ["metadata_only", "external_private", "redacted", "synthetic_public"]},
+        "sensitive_data_included": {"const": false}
+      },
+      "additionalProperties": false
+    }
+  }
+}
