@@ -5,3 +5,5 @@
 *.pem
 Personal/
 Backup/
+__pycache__/
+*.py[cod]
