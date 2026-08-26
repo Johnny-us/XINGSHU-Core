@@ -2,52 +2,19 @@ import json
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from xingshu_core import validate_record
 
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = ROOT / "tests/fixtures/v0.3/knowledge-object"
-SCHEMA = json.loads((ROOT / "schemas/v0.3/knowledge-object.schema.json").read_text())
-VALIDATOR = Draft202012Validator(SCHEMA)
-FORBIDDEN_KEYS = {
-    "payload", "raw_payload", "secret", "credential", "token", "cookie", "local_path",
-    "absolute_path", "email", "account_id", "device_id", "personal_identity", "chat_text",
-}
 
 
 def load(name):
     return json.loads((FIXTURES / name).read_text())
 
 
-def all_keys(value):
-    if isinstance(value, dict):
-        for key, child in value.items():
-            yield key
-            yield from all_keys(child)
-    elif isinstance(value, list):
-        for child in value:
-            yield from all_keys(child)
-
-
-def semantic_errors(record):
-    errors = []
-    if FORBIDDEN_KEYS.intersection(all_keys(record)):
-        errors.append("privacy_boundary_violation")
-    reuse = record.get("reuse_claim")
-    if reuse:
-        if reuse["scope_match"] != "match":
-            errors.append("reuse_scope_mismatch")
-        if reuse["origin_platform"] != reuse["target_platform"] and reuse["local_path_reused"]:
-            errors.append("cross_platform_path_reuse")
-    if record["document_state"] in {"superseded", "deprecated", "historical"} and record["current_loading_allowed"]:
-        errors.append("historical_loaded_as_current")
-    return errors
-
-
 def evaluate(record):
-    if list(VALIDATOR.iter_errors(record)) or semantic_errors(record):
-        return "rejected"
-    return "accepted"
+    return validate_record(record).status
 
 
 class KnowledgeObjectTests(unittest.TestCase):
