@@ -27,7 +27,9 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## 当前阶段
 
-项目目前处于 XINGSHU 2.0 Phase 1（基础设施与公开边界建立阶段）。Public Governance v0.1 candidates（公共治理 v0.1 候选）已建立，当前状态为 `candidate`，尚未激活为正式 Public Core Governance（公共核心治理）。Schema、Adapter 与 Runtime 尚未作为公开实现发布。
+本分支包含 XINGSHU-Core v0.2 Candidate（公共核心 v0.2 候选）的 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约）。
+
+所有 v0.2 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
 
 ## Quick Start（快速开始）
 
@@ -49,6 +51,10 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [Personal Instance Model](docs/PERSONAL_INSTANCE_MODEL.md) | 私人实例、覆盖层、备份和信息流说明 |
 | [Governance Versioning](docs/GOVERNANCE_VERSIONING.md) | 治理状态、版本、审查、Tag 与回滚规则 |
 | [Glossary](docs/GLOSSARY.md) | 公共术语解释，不创建新规则 |
+| [v0.1 → v0.2 Migration](docs/V0_1_TO_V0_2_MIGRATION.md) | 增量兼容、默认关闭与回退路径 |
+| [v0.2 Change Notes](docs/V0_2_CHANGE_NOTES.md) | v0.2 候选范围、状态与不包含项 |
+| [Schema Registry](schemas/README.md) | v0.2 机器 Schema 的唯一导航入口 |
+| [Test Registry](tests/README.md) | Conformance（符合性）、Compatibility（兼容性）与合成 fixtures 入口 |
 | [Security Policy](SECURITY.md) | 安全报告与敏感信息边界 |
 | [Contributing](CONTRIBUTING.md) | 公共贡献范围与审查流程 |
 

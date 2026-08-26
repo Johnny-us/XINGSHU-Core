@@ -56,3 +56,23 @@ visibility: public
 ## Protected Action（受保护动作）
 
 因现实影响、数据敏感度、专业责任、第三方权益、不可逆性或其他风险，需要额外资格、授权、审查、验证或停止机制的动作。具体门禁由适用治理和领域规则确定。
+
+## State Separation（状态分离）
+
+将 Source（来源）、Runtime（运行）、Observed（观测）与 Decision（决定）状态分开记录的架构契约。声明、命令成功、有证据的观测与治理决定不能相互冒充。
+
+## Evidence Metadata（证据元数据）
+
+说明 Evidence 的对象、结论范围、来源、方法、时效、隐私处理与纠错关系的公共记录。它不包含原始 Payload（载荷）或私人位置。
+
+## Evidence-Proportional Classification（证据比例分类）
+
+根据证据成熟度和环境差异建议 Class 1 / 2 / 3 或 `needs_review` 审查路由的候选分类。它不是风险等级，不减少门禁，也不产生采用或授权。
+
+## Pre-Execution Assessment（执行前评估）
+
+在外部动作开始前，核对目标、作用域、治理、风险、隐私、可逆性、Evidence Plan、Stop Condition 与已存在外部授权的候选契约。`ready_for_execution` 不等于 Authorization。
+
+## Capability Manifest（能力清单）
+
+为 Consumer（消费者）提供版本、候选能力、Schema、测试、兼容和回退引用的机器可读入口。Manifest 声明不等于启用、采用、治理生效或授权。

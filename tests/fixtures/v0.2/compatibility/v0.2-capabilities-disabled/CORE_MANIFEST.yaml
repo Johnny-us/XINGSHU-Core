@@ -1,0 +1,8 @@
+manifest_version: "0.2"
+release_stage: candidate
+governance_effect: none
+activation_state: not_active
+capabilities:
+  synthetic_capability:
+    status: candidate
+    enabled_by_default: false

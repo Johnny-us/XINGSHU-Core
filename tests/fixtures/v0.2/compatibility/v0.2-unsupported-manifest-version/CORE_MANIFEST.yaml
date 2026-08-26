@@ -1,0 +1,5 @@
+manifest_version: "9.9"
+release_stage: candidate
+governance_effect: none
+activation_state: not_active
+capabilities: {}
