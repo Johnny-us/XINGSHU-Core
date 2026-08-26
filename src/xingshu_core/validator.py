@@ -56,11 +56,19 @@ def _safe_schema_message(error: ValidationError) -> str:
 
 
 def _schema_issues(errors: Iterable[ValidationError]) -> tuple[ValidationIssue, ...]:
-    ordered = sorted(errors, key=lambda item: (list(item.absolute_path), str(item.validator)))
+    ordered = sorted(
+        errors,
+        key=lambda item: (tuple(str(part) for part in item.absolute_path), str(item.validator)),
+    )
     issues = []
     for error in ordered:
         parts = list(error.absolute_path)
         field = str(parts[-1]) if parts else None
+        if error.validator == "required" and isinstance(error.instance, Mapping):
+            missing = [name for name in error.validator_value if name not in error.instance]
+            if missing:
+                field = str(missing[0])
+                parts.append(field)
         issues.append(
             ValidationIssue(
                 code=f"schema_{error.validator or 'invalid'}",
@@ -215,12 +223,12 @@ def validate_record(
     except SchemaRegistryError:
         issue = ValidationIssue("schema_registry_error", "$", "canonical schema registry is unavailable")
         return _result(Decision.ERROR, "tool_error", record, None, (issue,))
-    schema_issues = _schema_issues(validator.iter_errors(record))
-    if schema_issues:
-        return _result(Decision.REJECT, "rejected", record, schema_ref, schema_issues)
     privacy_issues = _forbidden_key_issues(record)
     if privacy_issues:
         return _result(Decision.REJECT, "rejected", record, schema_ref, privacy_issues)
+    schema_issues = _schema_issues(validator.iter_errors(record))
+    if schema_issues:
+        return _result(Decision.REJECT, "rejected", record, schema_ref, schema_issues)
     return SEMANTIC_VALIDATORS[str(record_type)](record, schema_ref)
 
 

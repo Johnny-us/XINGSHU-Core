@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 
 
 SCHEMA_REFS = {
@@ -74,7 +75,7 @@ class SchemaRegistry:
             try:
                 schema = json.loads(path.read_text(encoding="utf-8"))
                 Draft202012Validator.check_schema(schema)
-            except (OSError, json.JSONDecodeError, TypeError) as exc:
+            except (OSError, json.JSONDecodeError, SchemaError, TypeError) as exc:
                 raise SchemaRegistryError("schema could not be loaded") from exc
             self._schemas[record_type] = schema
         return self._schemas[record_type]

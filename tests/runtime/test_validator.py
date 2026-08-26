@@ -58,6 +58,7 @@ class ValidatorRuntimeTests(unittest.TestCase):
         result = validate_record(record)
         rendered = json.dumps(result.to_dict())
         self.assertEqual(Decision.REJECT, result.decision)
+        self.assertEqual("privacy_boundary_violation", result.errors[0].code)
         self.assertNotIn("PRIVATE_VALUE_SENTINEL", rendered)
 
 
