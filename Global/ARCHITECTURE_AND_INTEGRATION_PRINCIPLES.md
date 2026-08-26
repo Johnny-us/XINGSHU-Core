@@ -90,6 +90,10 @@ Adapter 对每项配置应能够表达当前支持等级，至少包括：
 
 普通用户前台应优先看到“需要做什么 / 是否已经完成 / 是否需要确认”，而不是被迫理解 API、版本控制、Environment、Workspace 或其他底层实现名词。技术细节可以保留在 Expert / Developer View（专家 / 开发者视图）中。
 
+### 3.5 State Separation（状态分离）
+
+Public Core 使用 [State Separation Architecture（状态分离架构）](STATE_SEPARATION_ARCHITECTURE.md) 区分 Source、Runtime、Observed 与 Decision State。本文件只保留架构引用；状态字段、转换条件与安全默认以该专项候选与对应 Schema 为唯一实现语义。记录某个状态、命令返回成功或形成 Decision（决定），均不自动产生 Authorization（授权）、Activation（激活）或 Adoption（采用）。
+
 ## 4. Open & Composable by Default（默认开放与可组合）
 
 在不暴露 Secret、私人数据或受保护资产的前提下，XINGSHU 应优先采用：
