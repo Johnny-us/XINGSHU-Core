@@ -103,6 +103,19 @@ class StateSeparationV021Tests(unittest.TestCase):
             execute_transition_errors(transition, assessments, actions),
         )
 
+    def test_g1_assessment_reference_identity_mismatch_fails_closed(self):
+        transition, assessments, actions = required_context()
+        self.assertEqual(
+            [], execute_transition_errors(transition, assessments, actions)
+        )
+
+        assessment = assessments[transition["assessment_ref"]]
+        assessment["record_id"] = "assessment-other-id"
+        self.assertEqual(
+            ["assessment_reference_mismatch"],
+            execute_transition_errors(transition, assessments, actions),
+        )
+
     def test_g1_unknown_or_unresolved_assessment_fails_closed(self):
         # Case 5: unresolved and unknown outcomes are never guessed as valid.
         transition, assessments, actions = required_context()

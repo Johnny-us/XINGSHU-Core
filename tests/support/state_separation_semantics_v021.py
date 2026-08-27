@@ -58,6 +58,8 @@ def execute_transition_errors(
     assessment = assessments.get(assessment_ref)
     if not assessment or assessment.get("record_type") != "assessment_result":
         return ["assessment_unresolved"]
+    if assessment.get("record_id") != assessment_ref:
+        return ["assessment_reference_mismatch"]
 
     action_ref = assessment.get("action_ref")
     action = actions.get(action_ref) if isinstance(action_ref, str) else None
