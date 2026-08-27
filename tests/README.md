@@ -12,11 +12,14 @@
 - `conformance/v0.2/test_pre_execution_assessment.py`：Action / Assessment / Execution / Verification、Stop 与 Idempotency。
 - `compatibility/v0.1-v0.2/test_compatibility.py`：v0.1 ↔ v0.2、默认关闭、Personal Isolation 与 Rollback Harness。
 - `compatibility/v0.2-v0.2.1/test_compatibility.py`：v0.2 与 v0.2.1 Schema Identity、候选修订撤回以及 No-Downgrade（禁止降级解释）。
+- `compatibility/v0.2-v0.3/test_non_interference.py`：受限 Consumer 对禁用 v0.3 Candidate 的 Non-Interference（非干扰）、Unsupported Request Fail-Closed 与 No-Reverse-Migration（禁止反向迁移）。
 - `conformance/v0.3/test_memory_entry.py`：来源门禁、晋升审查、证据过期、推断与历史静默。
 - `conformance/v0.3/test_knowledge_object.py`：唯一主入口、附录边界、派生视图与跨平台 Scope。
 - `conformance/v0.3/test_migration_provenance.py`：来源映射、遗漏原因、源保护，以及 `migrated != verified`。
 
 v0.3 Fixtures 全部使用合成标识，覆盖缺少来源、推断未审查、陈旧证据、历史误加载、附录竞争正式来源、派生视图反写、跨平台路径复用、迁移漏源以及迁移完成但运行未验证等 Fail-Closed（失败关闭）路径。
+
+Knowledge Object 与 Migration Provenance 的 Package C Hardening（加固）优先使用 Parameterized Mutation Tests（参数化变异测试），验证角色、不变量、历史加载、来源清单、冲突、遗漏和状态维度独立性；未为覆盖率数量新增重复 Fixture。
 
 v0.2.1 Fixtures 同样只使用合成标识；G1 测试通过 `assessment_ref → action_ref → authorization_requirement` 关联验证 Conditional Authorization（条件授权），G2 测试明确区分 Runtime State / Readback Verification 与业务 Outcome Verification（结果验证）。
 
