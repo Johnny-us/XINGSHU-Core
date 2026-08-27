@@ -27,14 +27,15 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## 当前阶段
 
-本分支包含 XINGSHU-Core v0.3 Candidate（公共核心 v0.3 候选）。它在完整保留 v0.2 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约）的基础上，新增 Knowledge / Memory（知识 / 记忆）候选能力：
+本分支包含 XINGSHU-Core v0.4 Runnable Core / Validator CLI Candidate（可运行核心 / 验证器命令行候选）。它在完整保留 v0.2 State Separation（状态分离）、Evidence Lifecycle（证据生命周期）、Evidence-Proportional Adoption Policy Candidate（证据比例采用策略候选）与 Pre-Execution Assessment Contract（执行前评估契约），以及 v0.3 Knowledge / Memory（知识 / 记忆）候选能力的基础上，新增只读运行时验证层：
 
 - Memory Distillation（记忆提炼）与事件触发复审；
 - Knowledge Object Model（知识对象模型）的 `main / appendix / provenance` 角色；
 - Migration Provenance（迁移溯源）以及迁移完成与运行验证分离；
 - 三个 v0.3 JSON Schema、可复制模板、合成失败夹具和匿名迁移案例。
+- 使用现有 `schemas/v0.3/` 的严格 Schema Registry、RFC 3339 `date-time` FormatChecker、语义验证器和 `xingshu` CLI；该层只读取输入，不写回、不联网、不执行外部动作。
 
-所有 v0.2 与 v0.3 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
+所有 v0.2、v0.3 与 v0.4 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
 
 ## Quick Start（快速开始）
 
@@ -59,6 +60,8 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [v0.1 → v0.2 Migration](docs/V0_1_TO_V0_2_MIGRATION.md) | 增量兼容、默认关闭与回退路径 |
 | [v0.2 Change Notes](docs/V0_2_CHANGE_NOTES.md) | v0.2 候选范围、状态与不包含项 |
 | [v0.3 Change Notes](docs/V0_3_CHANGE_NOTES.md) | v0.3 知识 / 记忆候选范围与兼容边界 |
+| [v0.4 Change Notes](docs/V0_4_CHANGE_NOTES.md) | v0.4 只读运行时验证候选范围与兼容边界 |
+| [Validator CLI](docs/CLI.md) | v0.4 只读验证器安装、命令、决定与退出码 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
