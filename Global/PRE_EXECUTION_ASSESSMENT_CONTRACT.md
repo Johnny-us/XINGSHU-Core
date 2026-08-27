@@ -50,11 +50,20 @@ Action 明确目标、动作类型、Scope（作用域）、预期影响、受�
 
 执行前必须重新核对 Assessment 未过期、目标未漂移、授权仍有效且 Stop Condition 未触发。任一不成立时不得开始，只能记录 `not_started|stopped`。
 
+State Separation v0.2.1 的 `execute` Transition 使用 `assessment_ref` 关联本契约中的 `assessment_result`，再通过 `assessment_result.action_ref` 关联 `action_request`。Transition 不复制 `authorization_requirement`，也不因 `authorization_refs` 字段存在而把所有 Execute 视为需要授权。
+
+- `authorization_evaluation.status: not_required` 允许 Transition 使用空 `authorization_refs`，但不替代 Risk、Privacy、Reversibility、Evidence Plan、Stop Conditions 与 `assessment_outcome` 的检查；
+- `authorization_evaluation.status: valid` 只有在引用存在、Scope 匹配且 Freshness 为 `current` 时才能支持需要授权的执行；
+- `required|missing|stale|out_of_scope|unknown` 均不能支持完整执行；
+- Assessment 缺失、无法解析、过期，或 Action / Target 不匹配时 Fail Closed（默认拒绝）。
+
 相同 `idempotency_key` 与语义相同 Action 重试返回 `duplicate_suppressed`；同一 Key 对应不同目标、Scope、参数摘要或授权引用时返回 `idempotency_conflict` 并拒绝执行。
 
 ## 6. Verification Gate（验证门禁）
 
 Command Exit Code（命令退出码）为成功或 `executed_pending_verification` 不等于 `verified`。所有必要 Acceptance Criteria 必须 `pass`，Evidence Scope 必须匹配，且不存在未处理失败或不确定结果，才能记录 `verified`。稳定性分为 `single_observation`、`repeated`、`stably_verified` 或 `unknown`。
+
+Runtime State / Runtime Readback Verification（运行状态 / 回读验证）与本节的 Outcome Verification（结果验证）相互独立。Runtime State 的 `validation_state: verified|stably_verified` 只验证该 Runtime State 或 Readback Basis，不得自动创建 `verification_outcome: verified`，也不得推导业务目标、Acceptance Criteria、项目完成或 Governance Activation。业务结果验证的正式机器记录仍是本契约的 `verification_result`。
 
 ## 7. Error and Safe Next State（错误与安全下一状态）
 

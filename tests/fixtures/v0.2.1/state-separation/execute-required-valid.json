@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.2.1",
+  "record_type": "state_transition",
+  "record_id": "transition-execute-auth-01",
+  "created_at": "2026-01-01T00:02:00Z",
+  "from_state_ref": "state-target-alpha",
+  "to_state_ref": "state-target-alpha",
+  "transition_type": "execute",
+  "assessment_ref": "assessment-ready-auth",
+  "condition_results": [
+    {"condition_id": "assessment-current", "result": "pass"}
+  ],
+  "evidence_refs": ["evidence:synthetic-readback-plan"],
+  "authorization_refs": ["authorization:synthetic-valid"],
+  "occurred_at": "2026-01-01T00:02:00Z",
+  "transition_result": "accepted"
+}
