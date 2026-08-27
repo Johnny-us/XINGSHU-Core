@@ -11,15 +11,18 @@ schema_dialect: https://json-schema.org/draft/2020-12/schema
 unknown_capability_behavior: ignore_if_disabled_fail_closed_if_requested
 capabilities:
   state_separation:
-    version: "0.2"
+    version: "0.2.1"
     status: candidate
     enabled_by_default: false
     spec_ref: Global/STATE_SEPARATION_ARCHITECTURE.md
     schema_refs:
       - schemas/v0.2/state-separation.schema.json
+      - schemas/v0.2.1/state-separation.schema.json
     test_refs:
       - tests/conformance/v0.2/test_state_separation.py
+      - tests/conformance/v0.2.1/test_state_separation.py
       - tests/compatibility/v0.1-v0.2/test_compatibility.py
+      - tests/compatibility/v0.2-v0.2.1/test_compatibility.py
     dependencies: {}
     backward_compatibility: additive_optional
     governance_effect: none

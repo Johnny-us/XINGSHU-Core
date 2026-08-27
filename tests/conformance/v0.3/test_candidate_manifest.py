@@ -6,11 +6,11 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFEST = yaml.safe_load((ROOT / "CORE_MANIFEST.yaml").read_text())
-V02_CAPABILITIES = {
-    "state_separation",
-    "evidence_lifecycle",
-    "evidence_proportional_adoption",
-    "pre_execution_assessment",
+V02_CAPABILITY_VERSIONS = {
+    "state_separation": "0.2.1",
+    "evidence_lifecycle": "0.2",
+    "evidence_proportional_adoption": "0.2",
+    "pre_execution_assessment": "0.2",
 }
 V03_CAPABILITIES = {
     "knowledge_memory_lifecycle",
@@ -21,9 +21,11 @@ V03_CAPABILITIES = {
 
 class CandidateManifestTests(unittest.TestCase):
     def test_v02_capabilities_are_preserved(self):
-        self.assertTrue(V02_CAPABILITIES.issubset(MANIFEST["capabilities"]))
-        for name in V02_CAPABILITIES:
-            self.assertEqual("0.2", MANIFEST["capabilities"][name]["version"])
+        self.assertTrue(V02_CAPABILITY_VERSIONS.keys() <= MANIFEST["capabilities"].keys())
+        for name, expected_version in V02_CAPABILITY_VERSIONS.items():
+            self.assertEqual(
+                expected_version, MANIFEST["capabilities"][name]["version"]
+            )
 
     def test_v03_capabilities_are_additive_disabled_candidates(self):
         self.assertEqual("0.2", MANIFEST["manifest_version"])

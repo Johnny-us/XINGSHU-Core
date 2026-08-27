@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.2.1",
+  "record_type": "state_record",
+  "record_id": "state-runtime-verified-01",
+  "created_at": "2026-01-01T00:03:00Z",
+  "state_kind": "runtime",
+  "state_domain": "execution",
+  "state_namespace": "example.public",
+  "state_value": "loaded",
+  "subject_ref": {
+    "subject_id": "subject-alpha",
+    "subject_type": "synthetic-service"
+  },
+  "scope": {
+    "scope_type": "project",
+    "scope_ref": "scope-public-example"
+  },
+  "validation_state": "verified",
+  "basis_refs": ["runtime:synthetic-readback"],
+  "review_triggers": [
+    {"trigger_type": "environment_changed", "condition": "resample"}
+  ],
+  "runtime_ref": "runtime:synthetic",
+  "sampled_at": "2026-01-01T00:03:00Z",
+  "runtime_readback": {
+    "method_ref": "method:readback",
+    "result_code": "success"
+  }
+}
