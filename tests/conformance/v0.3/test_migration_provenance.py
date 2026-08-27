@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -85,6 +86,50 @@ class MigrationProvenanceTests(unittest.TestCase):
         record = load("migrated-but-runtime-unverified-valid.json")
         record["migration_state"] = "mostly_done"
         self.assertEqual("rejected", evaluate(record))
+
+    def test_duplicate_source_id_is_rejected_with_exact_reason(self):
+        record = load("migrated-but-runtime-unverified-valid.json")
+        record["source_inventory"].append(copy.deepcopy(record["source_inventory"][0]))
+        self.assertIn("duplicate_source_id", semantic_errors(record))
+        self.assertEqual("rejected", evaluate(record))
+
+    def test_unknown_mapping_or_omission_source_reference_is_rejected(self):
+        for collection in ("mappings", "omitted_items"):
+            with self.subTest(collection=collection):
+                record = load("migrated-but-runtime-unverified-valid.json")
+                record[collection][0]["source_id"] = "source-unknown"
+                self.assertIn("unknown_source_reference", semantic_errors(record))
+                self.assertEqual("rejected", evaluate(record))
+
+    def test_migrated_record_with_unresolved_conflict_is_rejected(self):
+        record = load("migrated-but-runtime-unverified-valid.json")
+        record["unresolved_conflicts"] = [
+            {
+                "conflict_id": "conflict-synthetic-001",
+                "source_refs": ["source:synthetic:001", "source:synthetic:002"],
+                "affected_claim_refs": ["claim:synthetic:migration"],
+                "conflict_type": "conclusion",
+                "safe_next_state": "needs_review",
+            }
+        ]
+        self.assertIn("migrated_with_unresolved_conflict", semantic_errors(record))
+        self.assertTrue(list(VALIDATOR.iter_errors(record)))
+        self.assertEqual("rejected", evaluate(record))
+
+    def test_needs_review_is_not_accepted_as_complete(self):
+        record = load("migrated-but-runtime-unverified-valid.json")
+        record["migration_state"] = "needs_review"
+        self.assertEqual([], list(VALIDATOR.iter_errors(record)))
+        self.assertEqual("needs_review", evaluate(record))
+        self.assertNotEqual("verified", record["runtime_validation_state"])
+
+    def test_omission_requires_source_linkage_and_reason(self):
+        for required_field in ("source_id", "reason_code", "reason"):
+            with self.subTest(required_field=required_field):
+                record = load("migrated-but-runtime-unverified-valid.json")
+                del record["omitted_items"][0][required_field]
+                self.assertTrue(list(VALIDATOR.iter_errors(record)))
+                self.assertEqual("rejected", evaluate(record))
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -76,6 +77,90 @@ class KnowledgeObjectTests(unittest.TestCase):
     def test_unknown_role_fails_closed(self):
         record = load("main-valid.json")
         record["document_role"] = "alternate_main"
+        self.assertEqual("rejected", evaluate(record))
+
+    def test_main_role_must_remain_source_of_truth(self):
+        record = load("main-valid.json")
+        record["source_of_truth"] = False
+        self.assertTrue(list(VALIDATOR.iter_errors(record)))
+        self.assertEqual("rejected", evaluate(record))
+
+    def test_appendix_and_provenance_require_backlink_and_non_source_status(self):
+        for role in ("appendix", "provenance"):
+            with self.subTest(role=role, mutation="missing_main_ref"):
+                record = load("main-valid.json")
+                record["document_role"] = role
+                record["source_of_truth"] = False
+                self.assertNotIn("main_ref", record["relationships"])
+                self.assertTrue(list(VALIDATOR.iter_errors(record)))
+
+            with self.subTest(role=role, mutation="source_of_truth"):
+                record = load("main-valid.json")
+                record["document_role"] = role
+                record["relationships"]["main_ref"] = "knowledge:synthetic-main"
+                record["source_of_truth"] = True
+                self.assertTrue(list(VALIDATOR.iter_errors(record)))
+
+    def test_derived_view_invariants_are_independently_enforced(self):
+        valid = load("main-valid.json")
+        valid["document_role"] = "appendix"
+        valid["origin_form"] = "derived_view"
+        valid["source_of_truth"] = False
+        valid["write_back_to_source"] = False
+        valid["current_loading_allowed"] = False
+        valid["relationships"]["main_ref"] = "knowledge:synthetic-main"
+        valid["relationships"]["derived_from"] = ["knowledge:synthetic-main"]
+        self.assertEqual("accepted", evaluate(valid))
+
+        mutations = (
+            ("write_back_to_source", True),
+            ("source_of_truth", True),
+        )
+        for field, value in mutations:
+            with self.subTest(field=field):
+                record = copy.deepcopy(valid)
+                record[field] = value
+                self.assertTrue(list(VALIDATOR.iter_errors(record)))
+
+        record = copy.deepcopy(valid)
+        record["relationships"]["derived_from"] = []
+        self.assertTrue(list(VALIDATOR.iter_errors(record)))
+
+    def test_historical_document_states_cannot_load_as_current(self):
+        for state in ("superseded", "deprecated", "historical"):
+            with self.subTest(state=state):
+                record = load("main-valid.json")
+                record["document_state"] = state
+                record["current_loading_allowed"] = True
+                self.assertTrue(list(VALIDATOR.iter_errors(record)))
+
+                record["current_loading_allowed"] = False
+                self.assertEqual("accepted", evaluate(record))
+
+    def test_document_migration_and_runtime_states_remain_independent(self):
+        record = load("main-valid.json")
+        self.assertEqual("active", record["document_state"])
+        self.assertEqual("pending_verification", record["runtime_validation_state"])
+        self.assertEqual("accepted", evaluate(record))
+
+        record["migration_state"] = "migrated"
+        self.assertEqual("accepted", evaluate(record))
+        self.assertEqual("pending_verification", record["runtime_validation_state"])
+
+    def test_reuse_scope_and_cross_platform_path_fail_closed(self):
+        cross_platform = load("cross-platform-path-reuse-invalid.json")
+        self.assertIn("reuse_scope_mismatch", semantic_errors(cross_platform))
+        self.assertIn("cross_platform_path_reuse", semantic_errors(cross_platform))
+        self.assertEqual("rejected", evaluate(cross_platform))
+
+        record = load("main-valid.json")
+        record["reuse_claim"] = {
+            "origin_platform": "platform_neutral",
+            "target_platform": "platform_neutral",
+            "scope_match": "unknown",
+            "local_path_reused": False,
+        }
+        self.assertIn("reuse_scope_mismatch", semantic_errors(record))
         self.assertEqual("rejected", evaluate(record))
 
 
