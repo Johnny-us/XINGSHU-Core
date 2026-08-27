@@ -7,6 +7,7 @@
 - `conformance/v0.2/test_state_separation.py`：State Separation Schema 与转换语义。
 - `conformance/v0.2.1/test_state_separation.py`：State Separation v0.2.1 的 Execute Assessment 关联、条件授权与 Runtime Readback Verification（运行回读验证）语义。
 - `conformance/v0.2/test_evidence_lifecycle.py`：Scope、Freshness、Correction 与 Payload Exclusion。
+- `conformance/v0.2/test_evidence_scope_freshness.py`：严格 RFC 3339 `date-time`、Evidence Scope / Freshness、Review Trigger 与自由文本 Constraint 的 Fail-Closed 语义。
 - `conformance/v0.2/test_evidence_proportional_adoption.py`：Class 1/2/3、保守降级与 non-effect。
 - `conformance/v0.2/test_pre_execution_assessment.py`：Action / Assessment / Execution / Verification、Stop 与 Idempotency。
 - `compatibility/v0.1-v0.2/test_compatibility.py`：v0.1 ↔ v0.2、默认关闭、Personal Isolation 与 Rollback Harness。
@@ -18,5 +19,11 @@
 v0.3 Fixtures 全部使用合成标识，覆盖缺少来源、推断未审查、陈旧证据、历史误加载、附录竞争正式来源、派生视图反写、跨平台路径复用、迁移漏源以及迁移完成但运行未验证等 Fail-Closed（失败关闭）路径。
 
 v0.2.1 Fixtures 同样只使用合成标识；G1 测试通过 `assessment_ref → action_ref → authorization_requirement` 关联验证 Conditional Authorization（条件授权），G2 测试明确区分 Runtime State / Readback Verification 与业务 Outcome Verification（结果验证）。
+
+## Strict Validation Support（严格验证支持）
+
+- 根目录 `requirements-test.txt` 声明可移植测试依赖；
+- `support/strict_schema_validation.py` 为 Draft 2020-12 Schema 显式启用 `FormatChecker`，并在 RFC 3339 `date-time` Checker 不可用或无效时拒绝创建 Validator；
+- `support/evidence_scope_freshness.py` 只对调用者提供的已解析对象执行纯函数式 Scope / Freshness 检查，不访问网络、Runtime、数据库或 Personal Instance，也不解释自由文本约束。
 
 标准执行、工具版本、失败注入、可重复性和 Evidence Output Contract 由对应 Candidate Gate 规格控制；本注册表不降低该规格。

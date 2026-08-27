@@ -1,18 +1,19 @@
 import hashlib
 import json
+import sys
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
-
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tests/support"))
+from strict_schema_validation import strict_validator  # noqa: E402
+
 OLD_FIXTURES = ROOT / "tests/fixtures/v0.2/state-separation"
 NEW_FIXTURES = ROOT / "tests/fixtures/v0.2.1/state-separation"
 OLD_SCHEMA = json.loads((ROOT / "schemas/v0.2/state-separation.schema.json").read_text())
 NEW_SCHEMA = json.loads((ROOT / "schemas/v0.2.1/state-separation.schema.json").read_text())
-OLD_VALIDATOR = Draft202012Validator(OLD_SCHEMA)
-NEW_VALIDATOR = Draft202012Validator(NEW_SCHEMA)
+OLD_VALIDATOR = strict_validator(OLD_SCHEMA)
+NEW_VALIDATOR = strict_validator(NEW_SCHEMA)
 ORIGINAL_V02_FIXTURE_SET_SHA256 = (
     "2dec455d3bb2cceeba03c77a24ced94949a85c50b39c21680ff5c0dbff26a152"
 )

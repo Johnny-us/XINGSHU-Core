@@ -1,15 +1,16 @@
 import json
+import sys
 import unittest
 from datetime import datetime
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
-
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tests/support"))
+from strict_schema_validation import strict_validator  # noqa: E402
+
 FIXTURES = ROOT / "tests/fixtures/v0.2/evidence-lifecycle"
 SCHEMA = json.loads((ROOT / "schemas/v0.2/evidence-lifecycle.schema.json").read_text())
-VALIDATOR = Draft202012Validator(SCHEMA)
+VALIDATOR = strict_validator(SCHEMA)
 FORBIDDEN = {"payload", "raw_payload", "content", "body", "secret", "credential", "token", "cookie", "local_path", "email", "account_id", "device_id", "personal_identity", "chat_text"}
 
 

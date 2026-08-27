@@ -1,14 +1,15 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
-
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tests/support"))
+from strict_schema_validation import strict_validator  # noqa: E402
+
 FIXTURES = ROOT / "tests/fixtures/v0.2/state-separation"
 SCHEMA = json.loads((ROOT / "schemas/v0.2/state-separation.schema.json").read_text())
-VALIDATOR = Draft202012Validator(SCHEMA)
+VALIDATOR = strict_validator(SCHEMA)
 
 
 def load(name):
