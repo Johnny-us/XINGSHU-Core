@@ -18,6 +18,8 @@ V03_CAPABILITIES = {
     "knowledge_object_model",
     "migration_provenance",
 }
+V04_CAPABILITY = "runnable_validation_cli"
+DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {V04_CAPABILITY}
 SUPPORTED_CAPABILITY_VERSIONS = {
     "state_separation": "0.2.1",
     "evidence_lifecycle": "0.2",
@@ -130,11 +132,21 @@ class V03NonInterferenceTests(unittest.TestCase):
                 self.assertEqual("none", item["authorization_effect"])
                 self.assertEqual("none", item["activation_effect"])
 
+    def test_v04_manifest_capability_remains_disabled_additive_candidate(self):
+        item = MANIFEST["capabilities"][V04_CAPABILITY]
+        self.assertEqual("0.4", item["version"])
+        self.assertEqual("candidate", item["status"])
+        self.assertFalse(item["enabled_by_default"])
+        self.assertEqual("additive_optional", item["backward_compatibility"])
+        self.assertEqual("none", item["governance_effect"])
+        self.assertEqual("none", item["authorization_effect"])
+        self.assertEqual("none", item["activation_effect"])
+
     def test_limited_consumer_ignores_unrequested_disabled_v03(self):
         consumer = MinimalLimitedConsumer()
         result = consumer.evaluate_manifest(MANIFEST)
         self.assertEqual("continue_v0.2_v0.2.1", result["mode"])
-        self.assertEqual(V03_CAPABILITIES, result["ignored_capabilities"])
+        self.assertEqual(DISABLED_UNSUPPORTED_CAPABILITIES, result["ignored_capabilities"])
         self.assertFalse(result["automatic_activation"])
         self.assertFalse(result["automatic_adoption"])
         self.assertFalse(result["automatic_migration"])
@@ -148,6 +160,13 @@ class V03NonInterferenceTests(unittest.TestCase):
                 )
                 self.assertEqual("blocked", result["mode"])
                 self.assertEqual("unsupported_capability", result["error_code"])
+
+    def test_requested_unsupported_v04_capability_fails_closed(self):
+        result = MinimalLimitedConsumer().evaluate_manifest(
+            MANIFEST, requested_capability=V04_CAPABILITY
+        )
+        self.assertEqual("blocked", result["mode"])
+        self.assertEqual("unsupported_capability", result["error_code"])
 
     def test_disabled_v03_records_are_not_routed_or_rewritten(self):
         cases = (

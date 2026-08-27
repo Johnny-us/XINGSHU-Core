@@ -129,3 +129,28 @@ capabilities:
     authorization_effect: none
     activation_effect: none
     rollback_behavior: disable_capability_and_ignore_v0_3_migration_records
+  runnable_validation_cli:
+    version: "0.4"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: docs/CLI.md
+    schema_refs:
+      - schemas/v0.3/memory-entry.schema.json
+      - schemas/v0.3/knowledge-object.schema.json
+      - schemas/v0.3/migration-provenance.schema.json
+    test_refs:
+      - tests/conformance/v0.3/test_candidate_manifest.py
+      - tests/runtime/test_cli.py
+      - tests/runtime/test_schema_registry.py
+      - tests/runtime/test_strict_validation.py
+      - tests/runtime/test_validator.py
+      - tests/compatibility/v0.2-v0.3/test_non_interference.py
+    dependencies:
+      knowledge_memory_lifecycle: ">=0.3"
+      knowledge_object_model: ">=0.3"
+      migration_provenance: ">=0.3"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: uninstall_cli_or_stop_invoking_runnable_validator
