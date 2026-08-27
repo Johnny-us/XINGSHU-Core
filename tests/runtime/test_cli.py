@@ -56,6 +56,29 @@ class CLIRuntimeTests(unittest.TestCase):
         self.assertEqual(3, result.returncode)
         self.assertIn("REJECT", result.stdout)
 
+    def test_invalid_rfc3339_created_at_returns_reject_at_cli_boundary(self):
+        base = json.loads((ROOT / "examples/v0.4/memory-valid.json").read_text())
+        invalid_values = (
+            "not-a-date",
+            "2026-02-30T00:00:00Z",
+            "2026-01-01T00:00:00",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            for invalid_value in invalid_values:
+                with self.subTest(created_at=invalid_value):
+                    path = Path(directory) / "invalid-rfc3339.json"
+                    record = dict(base)
+                    record["created_at"] = invalid_value
+                    path.write_text(json.dumps(record), encoding="utf-8")
+                    result = run_cli("validate", str(path), "--json")
+                    self.assertEqual(3, result.returncode, result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual("reject", payload["decision"])
+                    self.assertIn(
+                        "schema_format",
+                        {error["code"] for error in payload["errors"]},
+                    )
+
     def test_valid_migration_returns_zero(self):
         result = run_cli("validate", "examples/v0.4/migration-valid.json")
         self.assertEqual(0, result.returncode, result.stderr)
