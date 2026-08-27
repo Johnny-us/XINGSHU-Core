@@ -4,20 +4,19 @@ import sys
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
-
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = ROOT / "tests/fixtures/v0.2.1/state-separation"
 ASSESSMENT_FIXTURES = ROOT / "tests/fixtures/v0.2/pre-execution-assessment"
 SCHEMA = json.loads((ROOT / "schemas/v0.2.1/state-separation.schema.json").read_text())
-VALIDATOR = Draft202012Validator(SCHEMA)
 
 sys.path.insert(0, str(ROOT / "tests/support"))
 from state_separation_semantics_v021 import (  # noqa: E402
     execute_transition_errors,
     state_record_errors,
 )
+from strict_schema_validation import strict_validator  # noqa: E402
+
+VALIDATOR = strict_validator(SCHEMA)
 
 
 def load(path):
@@ -71,7 +70,7 @@ class StateSeparationV021Tests(unittest.TestCase):
         )
 
     def test_schema_is_valid_and_has_distinct_identity(self):
-        Draft202012Validator.check_schema(SCHEMA)
+        self.assertIsNotNone(strict_validator(SCHEMA).format_checker)
         self.assertEqual(
             "urn:xingshu:core:schema:v0.2.1:state-separation", SCHEMA["$id"]
         )

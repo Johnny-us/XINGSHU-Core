@@ -1,14 +1,15 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
-
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tests/support"))
+from strict_schema_validation import strict_validator  # noqa: E402
+
 FIXTURES = ROOT / "tests/fixtures/v0.3/memory-entry"
 SCHEMA = json.loads((ROOT / "schemas/v0.3/memory-entry.schema.json").read_text())
-VALIDATOR = Draft202012Validator(SCHEMA)
+VALIDATOR = strict_validator(SCHEMA)
 FORBIDDEN_KEYS = {
     "payload", "raw_payload", "content", "body", "secret", "credential", "token",
     "cookie", "local_path", "absolute_path", "email", "account_id", "device_id",
