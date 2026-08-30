@@ -6,6 +6,8 @@ XINGSHU Core 是 XINGSHU 2.0 的 Open Source Core（开源核心），用于承�
 
 XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可验证运行和长期可迁移性为基础的 AI Governance（人工智能治理）框架。Core 关注能够服务不同 System Owner（系统所有者）的公共能力，不绑定特定个人、设备、账号、路径或私人项目。
 
+长期产品定位上，XINGSHU 不以“新的知识库”或“新的项目管理系统”为目标。它更接近一个由用户控制的 AI Context / Memory / Habit / Governance Layer（上下文 / 记忆 / 习惯 / 治理层）：长期记住用户真正稳定的偏好、习惯与治理规则，并在需要时从用户原有的项目和知识来源中解析当前上下文，再提供给兼容 AI。
+
 ## 开源核心定位
 
 本仓库用于维护：
@@ -39,27 +41,38 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 ## Long-term Integration Direction（长期集成方向）
 
-XINGSHU 正在评估一个 `source-neutral + provider-neutral` 的 Knowledge Bridge（知识桥接）方向：
+XINGSHU 正在评估一个 `thin-core + source-neutral + provider-neutral` 的 Context & Memory Bridge（上下文与记忆桥接）方向。
+
+核心边界是：
 
 ```text
-Knowledge Sources
-      ↓
+External Sources of Truth
+Obsidian / Drive / Git / local files / other systems
+        ↓
 Source Adapters
-      ↓
-XINGSHU Runtime + Governance
-      ↓
+        ↓
+XINGSHU Thin Core
+Memory / Habits / Governance / Context References
+        ↓
 Protocol / Client Adapters
-      ↓
+        ↓
 Compatible AI Clients
 ```
 
-其目标是让知识源和 AI 客户端能够分别替换，而不把用户知识锁定在某一个笔记软件或某一家 AI 平台。
+XINGSHU 不默认把完整项目、知识库和业务状态再复制一份。项目和文档继续留在原始 Source of Truth；XINGSHU 只保存长期记忆、习惯、权限、上下文路由以及必要的轻量 Context Reference（上下文引用），需要时按授权从原来源解析最新上下文。
 
-Obsidian 可以作为第一个只读 Knowledge Source 验证；Codex 可以作为第一个 AI Client 验证。后续是否支持 ChatGPT、WorkBuddy、豆包系产品或其他 AI，必须依据各产品当时实际提供的 MCP、Tool API、Plugin/App、CLI 等能力进行 Capability Test（能力测试），而不是仅凭品牌名称宣称兼容。
+因此：
+
+- 项目事件通常留在项目事实源；
+- 跨项目、跨 AI 的稳定习惯与偏好可以进入 XINGSHU Memory；
+- “这个项目在哪里、如何安全找到”可以成为 XINGSHU Context Reference；
+- 可重建索引或缓存不构成新的 Source of Truth。
+
+Obsidian 可以作为第一个严格只读 External Source 验证；Codex 可以作为第一个 AI Client 验证。后续是否支持 ChatGPT、WorkBuddy、豆包系产品或其他 AI，必须依据各产品当时实际提供的 MCP、Tool API、Plugin/App、CLI 等能力进行 Capability Test（能力测试），而不是仅凭品牌名称宣称兼容。
 
 该方向目前仅为 `design-proposal`，不属于 v0.4 已实现 Runtime 能力，不自动构成 v0.5，也不产生 Governance effect。
 
-详见 [Knowledge Bridge Architecture（知识桥接架构）](docs/KNOWLEDGE_BRIDGE_ARCHITECTURE.md)。
+详见 [Context & Memory Bridge Architecture（上下文与记忆桥接架构）](docs/CONTEXT_MEMORY_BRIDGE_ARCHITECTURE.md)。
 
 ## Quick Start（快速开始）
 
@@ -88,8 +101,8 @@ Obsidian 可以作为第一个只读 Knowledge Source 验证；Codex 可以作�
 | [Validator CLI](docs/CLI.md) | v0.4 只读验证器安装、命令、决定与退出码 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
-| [Knowledge Bridge Architecture](docs/KNOWLEDGE_BRIDGE_ARCHITECTURE.md) | 知识源中立、AI 提供商中立的长期桥接设计提案 |
-| [ADR-0001 Source / Client Separation](docs/ADR-0001-KNOWLEDGE-SOURCE-CLIENT-SEPARATION.md) | 记录“知识源适配器与 AI 客户端适配器分离”的架构决策 |
+| [Context & Memory Bridge Architecture](docs/CONTEXT_MEMORY_BRIDGE_ARCHITECTURE.md) | 薄核心、外部事实源、记忆习惯与跨 AI 上下文桥接设计提案 |
+| [ADR-0001 Source / Client Separation](docs/ADR-0001-KNOWLEDGE-SOURCE-CLIENT-SEPARATION.md) | 记录外部事实源、轻量上下文引用与 AI 客户端分离的架构决策 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
 | [Test Registry](tests/README.md) | Conformance（符合性）、Compatibility（兼容性）与合成 fixtures 入口 |
 | [Security Policy](SECURITY.md) | 安全报告与敏感信息边界 |
