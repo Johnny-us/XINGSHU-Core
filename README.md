@@ -37,6 +37,30 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 所有 v0.2、v0.3 与 v0.4 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
 
+## Long-term Integration Direction（长期集成方向）
+
+XINGSHU 正在评估一个 `source-neutral + provider-neutral` 的 Knowledge Bridge（知识桥接）方向：
+
+```text
+Knowledge Sources
+      ↓
+Source Adapters
+      ↓
+XINGSHU Runtime + Governance
+      ↓
+Protocol / Client Adapters
+      ↓
+Compatible AI Clients
+```
+
+其目标是让知识源和 AI 客户端能够分别替换，而不把用户知识锁定在某一个笔记软件或某一家 AI 平台。
+
+Obsidian 可以作为第一个只读 Knowledge Source 验证；Codex 可以作为第一个 AI Client 验证。后续是否支持 ChatGPT、WorkBuddy、豆包系产品或其他 AI，必须依据各产品当时实际提供的 MCP、Tool API、Plugin/App、CLI 等能力进行 Capability Test（能力测试），而不是仅凭品牌名称宣称兼容。
+
+该方向目前仅为 `design-proposal`，不属于 v0.4 已实现 Runtime 能力，不自动构成 v0.5，也不产生 Governance effect。
+
+详见 [Knowledge Bridge Architecture（知识桥接架构）](docs/KNOWLEDGE_BRIDGE_ARCHITECTURE.md)。
+
 ## Quick Start（快速开始）
 
 1. 阅读 [Getting Started（开始使用）](docs/GETTING_STARTED.md)；
@@ -64,6 +88,8 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [Validator CLI](docs/CLI.md) | v0.4 只读验证器安装、命令、决定与退出码 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
+| [Knowledge Bridge Architecture](docs/KNOWLEDGE_BRIDGE_ARCHITECTURE.md) | 知识源中立、AI 提供商中立的长期桥接设计提案 |
+| [ADR-0001 Source / Client Separation](docs/ADR-0001-KNOWLEDGE-SOURCE-CLIENT-SEPARATION.md) | 记录“知识源适配器与 AI 客户端适配器分离”的架构决策 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
 | [Test Registry](tests/README.md) | Conformance（符合性）、Compatibility（兼容性）与合成 fixtures 入口 |
 | [Security Policy](SECURITY.md) | 安全报告与敏感信息边界 |
