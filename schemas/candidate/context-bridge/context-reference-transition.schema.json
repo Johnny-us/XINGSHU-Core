@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:context-reference-transition",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "Context Reference Transition Candidate",
+  "description": "Provider-neutral record of one canonical lifecycle transition pair with exact pre-transition and post-transition Registered Context Reference representation fingerprints. This schema expresses only whether a from_status to to_status pair is legal in the canonical graph and supplies exact-object audit linkage. It does not prove that the previous object currently exists, current status equals from_status, the new object changes only lifecycle state, immutable bindings remain equal, the actor is authorized, or persistence is atomic. A future deterministic validator and runtime must fail closed when the referenced representations change source_id, source_locator, source_entry_points, allowed_clients, access_scope, freshness_policy, provenance_policy, registration_authorization_id, or any other immutable binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_kind",
+    "transition_id",
+    "reference_id",
+    "previous_reference_fingerprint",
+    "new_reference_fingerprint",
+    "from_status",
+    "to_status",
+    "transitioned_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate",
+      "description": "Candidate contract identity only; not a release, adoption, or activation version."
+    },
+    "object_kind": {
+      "const": "context_reference_transition"
+    },
+    "transition_id": {
+      "$ref": "#/$defs/object_id"
+    },
+    "reference_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Opaque identity linkage to the Registered Context Reference whose lifecycle pair is recorded. Presence does not prove that the Reference exists or currently equals from_status."
+    },
+    "previous_reference_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "SHA-256 fingerprint of the exact Registered Context Reference representation before the transition. It is not a Source fingerprint, transition-evidence fingerprint, or authorization fingerprint, and this schema cannot prove that the represented object currently exists or equals from_status."
+    },
+    "new_reference_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "SHA-256 fingerprint of the exact Registered Context Reference representation after the transition. It supplies exact-object linkage only. A future deterministic validator must prove that only a legal lifecycle change occurred and that every immutable binding is unchanged; this schema cannot perform that cross-object comparison or prove atomic persistence or actor authority."
+    },
+    "from_status": {
+      "$ref": "#/$defs/lifecycle_status"
+    },
+    "to_status": {
+      "$ref": "#/$defs/lifecycle_status"
+    },
+    "transitioned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 transition-record timestamp. Runtime authentication and atomic state mutation are external requirements."
+    },
+    "transition_evidence_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Optional opaque evidence pointer. Its presence does not create authority, authenticate the transition, or prove atomic persistence."
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "from_status": {
+          "const": "active"
+        },
+        "to_status": {
+          "enum": [
+            "paused",
+            "source_unavailable",
+            "stale_locator",
+            "revoked",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status"
+      ]
+    },
+    {
+      "properties": {
+        "from_status": {
+          "const": "paused"
+        },
+        "to_status": {
+          "enum": [
+            "active",
+            "source_unavailable",
+            "stale_locator",
+            "revoked",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status"
+      ]
+    },
+    {
+      "properties": {
+        "from_status": {
+          "const": "source_unavailable"
+        },
+        "to_status": {
+          "enum": [
+            "active",
+            "paused",
+            "stale_locator",
+            "revoked",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status"
+      ]
+    },
+    {
+      "properties": {
+        "from_status": {
+          "const": "stale_locator"
+        },
+        "to_status": {
+          "enum": [
+            "paused",
+            "revoked",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status"
+      ]
+    },
+    {
+      "properties": {
+        "from_status": {
+          "const": "revoked"
+        },
+        "to_status": {
+          "const": "archived"
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status"
+      ]
+    }
+  ],
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "source_unavailable",
+        "stale_locator",
+        "revoked",
+        "archived"
+      ],
+      "description": "Exact canonical Registered Context Reference lifecycle state. Candidate and Proposal are separate object kinds; stale data and a moved Source are observations or conditions, not lifecycle states."
+    }
+  }
+}

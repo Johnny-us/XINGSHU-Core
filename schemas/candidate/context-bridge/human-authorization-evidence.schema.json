@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:human-authorization-evidence",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "Human Authorization Evidence Candidate",
+  "description": "Provider-neutral minimum structured evidence for an owner-controlled positive Human Authorization decision over exact validated Candidate and Proposal inputs, including the complete owner-approved registration projection. Schema validity does not prove that a real person authorized the record, authenticate a principal, prevent forgery, validate cross-object equality, establish registration eligibility, or create a Registered Context Reference; those require trusted provenance, a future deterministic chain validator, a registration contract, and a trusted runtime boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_kind",
+    "authorization_id",
+    "validation_artifact_id",
+    "validation_artifact_fingerprint",
+    "candidate_id",
+    "candidate_fingerprint",
+    "proposal_id",
+    "proposal_fingerprint",
+    "user_authorized",
+    "authorization_method",
+    "authorized_at",
+    "context_type",
+    "source_id",
+    "initial_status",
+    "retrieval_hint",
+    "final_canonical_name",
+    "final_source_locator",
+    "final_source_entry_points",
+    "final_access_scope",
+    "final_allowed_clients",
+    "final_freshness_policy",
+    "final_provenance_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate",
+      "description": "Candidate contract identity only; not a release, adoption, or activation version."
+    },
+    "object_kind": {
+      "const": "human_authorization_evidence"
+    },
+    "authorization_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Opaque identity for positive Human Authorization evidence that may be referenced by a later registration chain only after complete deterministic and trusted-provenance validation."
+    },
+    "validation_artifact_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity linkage to the exact deterministic Validation Artifact presented for Human review."
+    },
+    "validation_artifact_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Validation Artifact bytes presented for Human review."
+    },
+    "candidate_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity linkage to the Candidate input bound by the Validation Artifact."
+    },
+    "candidate_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Candidate input."
+    },
+    "proposal_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity linkage to the Registration Proposal input bound by the Validation Artifact."
+    },
+    "proposal_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Registration Proposal input."
+    },
+    "user_authorized": {
+      "const": true,
+      "description": "This schema represents only positive Human Authorization evidence usable by a later registration chain. Rejection or cancellation records must not use this authorization_id to authorize registration. Schema validity alone does not prove a real Human action."
+    },
+    "authorization_method": {
+      "const": "explicit_human_confirmation",
+      "description": "Provider-neutral minimum method claim: this Evidence asserts that the positive decision came from an explicit Human confirmation flow. Schema validity does not prove that a real Human existed, a real confirmation occurred, a principal was authenticated, or the evidence is unforgeable; trusted provenance, deterministic chain validation, and a trusted runtime boundary remain required."
+    },
+    "authorized_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp asserted for the Human Authorization decision; trusted provenance and authentication remain external enforcement requirements."
+    },
+    "context_type": {
+      "$ref": "#/$defs/context_type",
+      "description": "Exact owner-approved registration projection for Registered Context Reference context_type. It must bind the exact validated Candidate context_type; this single schema cannot prove cross-object equality, which is deferred to a future deterministic chain validator."
+    },
+    "source_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Exact owner-approved provider-neutral Source identity for Registered Context Reference source_id. It must bind the exact validated Candidate source_id and must not be derived from a locator, overridden by a caller, or supplied as AI authority; cross-object equality is deferred to a future deterministic chain validator."
+    },
+    "initial_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "source_unavailable",
+        "stale_locator",
+        "revoked",
+        "archived"
+      ],
+      "description": "Exact owner-approved initial lifecycle value mapped without defaulting to Registered Context Reference status. It must not be guessed or derived from Proposal, AI, caller, or runtime state. This schema enforces only the canonical lifecycle value; registration eligibility and chain consistency are deferred to a future deterministic validator and registration contract."
+    },
+    "retrieval_hint": {
+      "$ref": "#/$defs/retrieval_hint",
+      "description": "Exact owner-approved bounded operational hint mapped to Registered Context Reference retrieval_hint without regeneration or silent rewrite. It is not authority, access scope, Source content, or whole-root retrieval permission; cross-object consistency is deferred to a future deterministic chain validator."
+    },
+    "final_canonical_name": {
+      "$ref": "#/$defs/human_name",
+      "description": "Final owner-selected canonical name, not an AI suggestion or caller authority."
+    },
+    "final_aliases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/human_name"
+      },
+      "description": "Optional final owner-selected aliases."
+    },
+    "final_source_locator": {
+      "$ref": "#/$defs/opaque_locator",
+      "description": "Final owner-selected opaque Source identity or root anchor. It does not authorize whole-root retrieval, and containment or equality with the validated Candidate cannot be inferred from locator syntax or proved by this single schema."
+    },
+    "final_source_entry_points": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/opaque_locator"
+      },
+      "description": "Final owner-selected exact ordered retrieval entries. Array order is significant and must be preserved; implementations must not sort, auto-deduplicate, silently truncate, or derive entries from final_source_locator. These entries must be an exact ordered subset of the validated Proposal suggested_source_entry_points, an invariant enforced by a future deterministic cross-object validator rather than this single schema."
+    },
+    "final_access_scope": {
+      "type": "string",
+      "enum": [
+        "private",
+        "restricted",
+        "shared"
+      ],
+      "description": "Final owner-selected access scope compatible with the Registered Context Reference contract."
+    },
+    "final_allowed_clients": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/client_id"
+      },
+      "description": "Final owner-selected client authorization values. An empty array is explicitly valid and means deny all clients. Wildcard identifiers are forbidden, and AI or caller identity cannot populate this field as authority."
+    },
+    "final_freshness_policy": {
+      "type": "string",
+      "enum": [
+        "immutable",
+        "manual_verification",
+        "verify_before_use"
+      ],
+      "description": "Final owner-selected freshness policy compatible with the Registered Context Reference contract."
+    },
+    "final_provenance_policy": {
+      "type": "string",
+      "enum": [
+        "locator_only",
+        "locator_and_verification",
+        "locator_and_fingerprint"
+      ],
+      "description": "Final owner-selected provenance policy compatible with the Registered Context Reference contract."
+    }
+  },
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "project",
+        "document",
+        "workflow",
+        "knowledge",
+        "decision",
+        "conversation",
+        "profile"
+      ]
+    },
+    "human_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "\\S"
+    },
+    "opaque_locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "\\S"
+    },
+    "retrieval_hint": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "\\S"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "client_id": {
+      "allOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        {
+          "not": {
+            "enum": [
+              "*",
+              "all",
+              "any"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
