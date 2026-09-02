@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:derived-provider-metadata",
+  "title": "Derived Provider Metadata Candidate",
+  "description": "Provider-neutral structural contract for disposable provider-derived lookup hints. Derived metadata is rebuildable, never authoritative, and cannot replace direct authoritative resolution or create a broader scope.",
+  "$comment": "schema_version=context-bridge-candidate; governance_effect=none; authorization_effect=none; activation_effect=none",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_kind",
+    "derived_object_id",
+    "provider_id",
+    "authority_class",
+    "rebuildable",
+    "usage_class",
+    "final_authority",
+    "authoritative_reference_id",
+    "authoritative_reference_fingerprint",
+    "authoritative_source_id",
+    "verification_state",
+    "freshness_state",
+    "usable_for_lookup",
+    "provenance",
+    "fallback_policy",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate"
+    },
+    "object_kind": {
+      "const": "derived_provider_metadata"
+    },
+    "derived_object_id": {
+      "$ref": "#/$defs/stable_identifier"
+    },
+    "provider_id": {
+      "$ref": "#/$defs/stable_identifier"
+    },
+    "authority_class": {
+      "const": "derived"
+    },
+    "rebuildable": {
+      "const": true
+    },
+    "usage_class": {
+      "const": "lookup_hint_only"
+    },
+    "final_authority": {
+      "const": false
+    },
+    "authoritative_reference_id": {
+      "$ref": "#/$defs/stable_identifier"
+    },
+    "authoritative_reference_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint"
+    },
+    "authoritative_source_id": {
+      "$ref": "#/$defs/stable_identifier"
+    },
+    "verification_state": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "authoritatively_supported",
+        "unsupported",
+        "stale"
+      ],
+      "description": "Support state relative to direct authoritative evidence. Even authoritatively supported metadata remains derived and non-authoritative."
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "current",
+        "stale",
+        "unknown"
+      ]
+    },
+    "usable_for_lookup": {
+      "type": "boolean",
+      "description": "Permits only a narrowing lookup hint. It never permits final resolution, scope expansion, or fallback authority."
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "fallback_policy": {
+      "$ref": "#/$defs/fallback_policy"
+    },
+    "derived_hint": {
+      "$ref": "#/$defs/derived_hint"
+    },
+    "created_at": {
+      "$ref": "#/$defs/timestamp"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_state": {
+            "const": "authoritatively_supported"
+          }
+        },
+        "required": [
+          "verification_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "current"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_state": {
+            "enum": [
+              "unverified",
+              "unsupported",
+              "stale"
+            ]
+          }
+        },
+        "required": [
+          "verification_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "usable_for_lookup": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "usable_for_lookup": {
+            "const": true
+          }
+        },
+        "required": [
+          "usable_for_lookup"
+        ]
+      },
+      "then": {
+        "required": [
+          "derived_hint"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "stable_identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "derived_at",
+        "source_observation_fingerprints"
+      ],
+      "properties": {
+        "derived_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "source_observation_fingerprints": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/sha256_fingerprint"
+          }
+        }
+      }
+    },
+    "fallback_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "derived_unavailable_behavior",
+        "authoritative_unavailable_behavior"
+      ],
+      "properties": {
+        "derived_unavailable_behavior": {
+          "const": "direct_authoritative_path"
+        },
+        "authoritative_unavailable_behavior": {
+          "const": "fail_closed"
+        }
+      }
+    },
+    "derived_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hint_type",
+        "hint_values"
+      ],
+      "properties": {
+        "hint_type": {
+          "type": "string",
+          "enum": [
+            "entry_selection",
+            "query_terms",
+            "locator_candidate"
+          ]
+        },
+        "hint_values": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "not": {
+              "enum": [
+                "*",
+                "all",
+                "any",
+                "ALL",
+                "ANY",
+                "All",
+                "Any",
+                "/**"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Disposable narrowing hints only; values cannot authorize, broaden, or replace direct Source resolution."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+    }
+  }
+}

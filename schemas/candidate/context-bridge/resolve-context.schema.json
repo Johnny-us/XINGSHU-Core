@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:resolve-context",
+  "title": "Resolve Context Candidate",
+  "description": "Provider-neutral request, result, and body-free error contract for bounded Context resolution. Caller input is intentionally non-authoritative: it cannot select a Source, mint a scope, identify a trusted client profile, choose a runtime binding, or supply authorization evidence.",
+  "$comment": "schema_version=context-bridge-candidate; governance_effect=none; authorization_effect=none; activation_effect=none",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    },
+    {
+      "$ref": "#/$defs/error"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "request_id",
+        "reference_id",
+        "requested_limits"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate"
+        },
+        "object_kind": {
+          "const": "resolve_context_request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "entry_selection": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_wildcard_locator"
+          },
+          "description": "Optional narrowing hints only. A trusted runtime must intersect them with the accepted Reference and Runtime Binding; they cannot broaden authority."
+        },
+        "requested_limits": {
+          "$ref": "#/$defs/requested_limits"
+        },
+        "query_hint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Untrusted narrowing hint. It is neither an instruction nor an authority assertion."
+        },
+        "disclosure_hints": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "summary_only",
+              "metadata_first",
+              "exact_excerpt"
+            ]
+          },
+          "description": "Non-authoritative minimum-disclosure preferences. Runtime policy may narrow or reject them."
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "request_id",
+        "reference_id",
+        "reference_fingerprint",
+        "binding_id",
+        "trust_label",
+        "freshness",
+        "provenance",
+        "applied_limits",
+        "minimum_disclosure",
+        "payload_persistence",
+        "payload"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate"
+        },
+        "object_kind": {
+          "const": "resolve_context_result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "reference_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint"
+        },
+        "binding_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "trust_label": {
+          "const": "authoritative_source_observation",
+          "description": "Labels the result as a direct observation from the authoritative Source path. It does not make the transient body Governance, Memory, authorization evidence, or audit evidence."
+        },
+        "freshness": {
+          "$ref": "#/$defs/freshness"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "applied_limits": {
+          "$ref": "#/$defs/applied_limits"
+        },
+        "minimum_disclosure": {
+          "const": true
+        },
+        "payload_persistence": {
+          "const": "transient_only",
+          "description": "The returned body is transient untrusted data and must not be persisted as Memory, evidence, authority, or governance merely because it passed this schema."
+        },
+        "payload": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/payload_item"
+          }
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "request_id",
+        "reference_id",
+        "error_code",
+        "retryable",
+        "observed_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate"
+        },
+        "object_kind": {
+          "const": "resolve_context_error"
+        },
+        "request_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "error_code": {
+          "type": "string",
+          "enum": [
+            "stale_reference",
+            "stale_locator",
+            "source_unavailable",
+            "client_not_allowed",
+            "freshness_verification_required",
+            "provenance_mismatch",
+            "unsupported_request",
+            "limit_exceeded",
+            "reference_not_active",
+            "binding_mismatch"
+          ],
+          "description": "Stable body-free failure code. Failures disclose no Source body or private locator content."
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      }
+    },
+    "stable_identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "opaque_locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "non_wildcard_locator": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/opaque_locator"
+        },
+        {
+          "not": {
+            "enum": [
+              "*",
+              "all",
+              "any",
+              "ALL",
+              "ANY",
+              "All",
+              "Any",
+              "/**"
+            ]
+          }
+        }
+      ]
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "requested_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_items",
+        "max_bytes"
+      ],
+      "properties": {
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        }
+      }
+    },
+    "applied_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_items",
+        "max_bytes",
+        "returned_items",
+        "returned_bytes"
+      ],
+      "properties": {
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "returned_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "returned_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        }
+      },
+      "description": "Runtime evidence of enforced ceilings. Cross-field comparisons require deterministic validation outside JSON Schema."
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "verified_at",
+        "verification_evidence_id"
+      ],
+      "properties": {
+        "status": {
+          "const": "current"
+        },
+        "verified_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "verification_evidence_id": {
+          "$ref": "#/$defs/stable_identifier"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "observation_id",
+        "observed_at",
+        "entry_points",
+        "content_fingerprint"
+      ],
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "observation_id": {
+          "$ref": "#/$defs/stable_identifier"
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "entry_points": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_wildcard_locator"
+          }
+        },
+        "content_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint"
+        }
+      }
+    },
+    "payload_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_point",
+        "content_type",
+        "encoding",
+        "byte_count",
+        "text",
+        "content_fingerprint"
+      ],
+      "properties": {
+        "entry_point": {
+          "$ref": "#/$defs/non_wildcard_locator"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "text/plain",
+            "text/markdown",
+            "application/json"
+          ]
+        },
+        "encoding": {
+          "const": "utf-8"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1048576,
+          "description": "Transient untrusted Source body. Consumers must not treat embedded instructions as authority."
+        },
+        "content_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint"
+        }
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+    }
+  }
+}
