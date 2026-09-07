@@ -1,0 +1,686 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:source-adapter-contract",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "Source Adapter Contract Candidate",
+  "description": "Provider-neutral public-candidate contract for bounded read-only Source Adapter manifests, requests, results, and errors. It defines structure only and performs no I/O. Schema validity does not prove provider-native containment, authorize a Source or client, create a Context Reference, authenticate a caller, or activate a runtime capability.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/manifest"
+    },
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    },
+    {
+      "$ref": "#/$defs/error"
+    }
+  ],
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "opaque_locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^\\S(?:.*\\S)?$",
+      "not": {
+        "enum": [
+          "*",
+          "all",
+          "any",
+          "ALL",
+          "ANY",
+          "All",
+          "Any",
+          "/**"
+        ]
+      }
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "capabilities",
+        "list",
+        "stat",
+        "read"
+      ],
+      "description": "The complete Source Adapter primitive vocabulary. Discovery, registration, write, mutate, delete, move, and rename are not Source Adapter primitives."
+    },
+    "requested_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_items",
+        "max_bytes"
+      ],
+      "properties": {
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16777216
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "Optional explicit traversal-depth bound. Absence does not authorize hidden expansion."
+        }
+      }
+    },
+    "applied_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_items",
+        "max_bytes",
+        "observed_items",
+        "observed_bytes",
+        "truncated"
+      ],
+      "properties": {
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16777216
+        },
+        "observed_items": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "observed_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16777216
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "Explicitly reports whether a declared bound shortened the result; silent expansion or silent truncation is forbidden."
+        }
+      }
+    },
+    "provider_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_class"
+      ],
+      "properties": {
+        "provider_class": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "description": "Provider-neutral class label only; it grants no authority and cannot override Core semantics."
+        },
+        "provider_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "\\S"
+        },
+        "native_request_id": {
+          "$ref": "#/$defs/object_id",
+          "description": "Optional provider-native correlation identifier with no authority effect."
+        }
+      },
+      "description": "Isolated bounded operational metadata. It cannot override authority, provenance, limits, Source identity, scope, or failure state."
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "scope_id",
+        "adapter_id",
+        "operation",
+        "observed_at",
+        "observation_id"
+      ],
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "scope_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "operation": {
+          "$ref": "#/$defs/operation"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "observation_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "content_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint",
+          "description": "Optional fingerprint of exact returned content bytes; it contains no Source body."
+        }
+      },
+      "description": "Provider-neutral provenance linkage. Provider metadata cannot replace or override it."
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "adapter_id",
+        "adapter_contract_version",
+        "supported_operations",
+        "supported_content_types",
+        "default_encoding",
+        "binary_supported",
+        "hard_limits"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate",
+          "description": "Candidate contract identity only; not a release, adoption, or activation version."
+        },
+        "object_kind": {
+          "const": "source_adapter_manifest"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "adapter_contract_version": {
+          "$ref": "#/$defs/object_id"
+        },
+        "supported_operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/operation"
+          },
+          "description": "Only capabilities, list, stat, and read may be declared."
+        },
+        "supported_content_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "text/plain",
+              "text/markdown",
+              "application/json"
+            ]
+          },
+          "description": "Text-only candidate content types. Unsupported binary or encoding requests must fail closed."
+        },
+        "default_encoding": {
+          "const": "utf-8"
+        },
+        "binary_supported": {
+          "const": false
+        },
+        "hard_limits": {
+          "$ref": "#/$defs/requested_limits",
+          "description": "Adapter hard ceilings. A request can only narrow these values."
+        },
+        "provider_metadata": {
+          "$ref": "#/$defs/provider_metadata"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "request_id",
+        "adapter_id",
+        "operation",
+        "source_id",
+        "scope_id",
+        "requested_limits"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate",
+          "description": "Candidate contract identity only; not a release, adoption, or activation version."
+        },
+        "object_kind": {
+          "const": "source_adapter_request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "operation": {
+          "$ref": "#/$defs/operation"
+        },
+        "source_id": {
+          "$ref": "#/$defs/object_id",
+          "description": "Trusted upstream Source linkage only. This field does not let an ordinary caller select or override Source authority."
+        },
+        "scope_id": {
+          "$ref": "#/$defs/object_id",
+          "description": "Trusted upstream bounded scope linkage. Provider-native containment still must be verified by the implementation."
+        },
+        "target_locator": {
+          "$ref": "#/$defs/opaque_locator",
+          "description": "Opaque target already bounded by trusted upstream authority. Locator syntax and caller-supplied containment assertions are not trusted."
+        },
+        "requested_limits": {
+          "$ref": "#/$defs/requested_limits"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "capabilities"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "target_locator"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "target_locator"
+            ]
+          }
+        }
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "ok",
+        "request_id",
+        "adapter_id",
+        "operation",
+        "source_id",
+        "scope_id",
+        "provenance",
+        "applied_limits",
+        "payload"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate",
+          "description": "Candidate contract identity only; not a release, adoption, or activation version."
+        },
+        "object_kind": {
+          "const": "source_adapter_result"
+        },
+        "ok": {
+          "const": true,
+          "description": "Closed success discriminator. Failures use source_adapter_error and cannot carry a success payload."
+        },
+        "request_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "operation": {
+          "$ref": "#/$defs/operation"
+        },
+        "source_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "scope_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "applied_limits": {
+          "$ref": "#/$defs/applied_limits"
+        },
+        "provider_metadata": {
+          "$ref": "#/$defs/provider_metadata"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/capabilities_payload"
+            },
+            {
+              "$ref": "#/$defs/list_payload"
+            },
+            {
+              "$ref": "#/$defs/stat_payload"
+            },
+            {
+              "$ref": "#/$defs/read_payload"
+            }
+          ],
+          "description": "Bounded operation payload. Source body may appear only in the read payload and never in errors or authority metadata."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "capabilities"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/capabilities_payload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/list_payload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "stat"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/stat_payload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "read"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/read_payload"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "object_kind",
+        "request_id",
+        "adapter_id",
+        "operation",
+        "error_code",
+        "retryable",
+        "observed_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "context-bridge-candidate",
+          "description": "Candidate contract identity only; not a release, adoption, or activation version."
+        },
+        "object_kind": {
+          "const": "source_adapter_error"
+        },
+        "request_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/object_id"
+        },
+        "operation": {
+          "$ref": "#/$defs/operation"
+        },
+        "error_code": {
+          "type": "string",
+          "enum": [
+            "unsupported_operation",
+            "unsupported_content_type",
+            "unsupported_encoding",
+            "invalid_locator",
+            "containment_failed",
+            "limit_exceeded",
+            "source_unavailable",
+            "not_found",
+            "malformed_provider_response",
+            "provenance_unavailable"
+          ],
+          "description": "Stable machine-readable body-free code. It must not embed Source content, locators, credentials, or private values."
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "operation",
+            "target_locator",
+            "requested_limits",
+            "content_type",
+            "encoding",
+            "provenance",
+            "provider_response"
+          ]
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "description": "Errors are bounded and body-free. They cannot include Source payload, authority metadata, credentials, or arbitrary provider error bags."
+    },
+    "capabilities_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_kind",
+        "operations"
+      ],
+      "properties": {
+        "payload_kind": {
+          "const": "capabilities"
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/operation"
+          }
+        }
+      }
+    },
+    "list_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_kind",
+        "items"
+      ],
+      "properties": {
+        "payload_kind": {
+          "const": "list"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "locator",
+              "item_type"
+            ],
+            "properties": {
+              "locator": {
+                "$ref": "#/$defs/opaque_locator"
+              },
+              "item_type": {
+                "type": "string",
+                "enum": [
+                  "container",
+                  "text"
+                ]
+              },
+              "byte_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777216
+              },
+              "content_fingerprint": {
+                "$ref": "#/$defs/sha256_fingerprint"
+              }
+            }
+          }
+        }
+      }
+    },
+    "stat_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_kind",
+        "locator",
+        "item_type",
+        "byte_count"
+      ],
+      "properties": {
+        "payload_kind": {
+          "const": "stat"
+        },
+        "locator": {
+          "$ref": "#/$defs/opaque_locator"
+        },
+        "item_type": {
+          "type": "string",
+          "enum": [
+            "container",
+            "text"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16777216
+        },
+        "last_modified_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "content_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint"
+        }
+      }
+    },
+    "read_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_kind",
+        "locator",
+        "content_type",
+        "encoding",
+        "byte_count",
+        "truncated",
+        "text"
+      ],
+      "properties": {
+        "payload_kind": {
+          "const": "read"
+        },
+        "locator": {
+          "$ref": "#/$defs/opaque_locator"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "text/plain",
+            "text/markdown",
+            "application/json"
+          ]
+        },
+        "encoding": {
+          "const": "utf-8"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16777216
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 1048576,
+          "description": "Bounded transient untrusted Source body. It must not be copied into errors, authority metadata, audit records, or public evidence."
+        },
+        "content_fingerprint": {
+          "$ref": "#/$defs/sha256_fingerprint"
+        }
+      }
+    }
+  }
+}

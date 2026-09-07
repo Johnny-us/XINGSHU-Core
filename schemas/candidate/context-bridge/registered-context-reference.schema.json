@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:registered-context-reference",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "XINGSHU Context Bridge Candidate Registered Context Reference",
+  "description": "Portable public-candidate contract for the minimum shape of a relationship registered only after an external complete authorization chain. Schema validity alone does not prove Candidate, Proposal, deterministic Validation, Human Authorization, or cross-object linkage. Binding fields are intended to be immutable after registration, but duplicate protection, no-overwrite atomicity, immutable linkage, and lifecycle transition checks are deferred to a future deterministic validator and runtime contract. This schema does not activate a runtime capability.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "object_kind",
+    "reference_id",
+    "context_type",
+    "canonical_name",
+    "source_id",
+    "source_locator",
+    "source_entry_points",
+    "access_scope",
+    "allowed_clients",
+    "freshness_policy",
+    "provenance_policy",
+    "retrieval_hint",
+    "status",
+    "registration_authorization_id",
+    "registered_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate",
+      "description": "Candidate contract identity only; not a release, adoption, or activation version."
+    },
+    "object_kind": {
+      "const": "registered_context_reference"
+    },
+    "reference_id": {
+      "$ref": "#/$defs/object_id"
+    },
+    "context_type": {
+      "$ref": "#/$defs/context_type"
+    },
+    "canonical_name": {
+      "$ref": "#/$defs/human_name"
+    },
+    "aliases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/human_name"
+      }
+    },
+    "source_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Provider-neutral Source identity."
+    },
+    "source_locator": {
+      "$ref": "#/$defs/opaque_locator",
+      "description": "Opaque Source identity or root anchor only. It does not authorize the entire root, and retrieval authority must not be derived from it."
+    },
+    "source_entry_points": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/opaque_locator"
+      },
+      "description": "Exact ordered authorized retrieval entries. Array order is significant and must be preserved; implementations must not sort, auto-deduplicate, silently truncate, or derive these entries from source_locator."
+    },
+    "access_scope": {
+      "type": "string",
+      "enum": [
+        "private",
+        "restricted",
+        "shared"
+      ],
+      "description": "Final owner-controlled access-scope state established outside this schema."
+    },
+    "allowed_clients": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/client_id"
+      },
+      "description": "Final owner-controlled client authorization state. An empty array is explicitly valid and means deny all clients. Wildcard identifiers are forbidden."
+    },
+    "freshness_policy": {
+      "type": "string",
+      "enum": [
+        "immutable",
+        "manual_verification",
+        "verify_before_use"
+      ]
+    },
+    "provenance_policy": {
+      "type": "string",
+      "enum": [
+        "locator_only",
+        "locator_and_verification",
+        "locator_and_fingerprint"
+      ]
+    },
+    "retrieval_hint": {
+      "$ref": "#/$defs/retrieval_hint",
+      "description": "Bounded operational hint; not Source content or an authority override."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "source_unavailable",
+        "stale_locator",
+        "revoked",
+        "archived"
+      ],
+      "description": "Canonical Registered Context Reference lifecycle only. active may proceed to active-use checks but still requires current authorization, freshness, scope, and provenance; paused remains registered but cannot be used actively; source_unavailable means no current authoritative Source observation can be obtained; stale_locator means current locator or identity evidence no longer supports the registered relationship; revoked forbids use; archived is retained for history and does not authorize active use. Candidate and Proposal are separate object kinds, while stale data or a moved Source are observations rather than lifecycle states."
+    },
+    "registration_authorization_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Opaque pointer to external Human Authorization evidence. Its presence does not prove that the complete registration chain was validated."
+    },
+    "registered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 registration timestamp."
+    },
+    "last_verified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "RFC 3339 verification timestamp when verified; null or absence is allowed only with null or absent verification_evidence_id."
+    },
+    "verification_evidence_id": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/object_id"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Opaque verification-evidence pointer when verified; null or absence is allowed only with null or absent last_verified_at."
+    },
+    "content_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Optional content fingerprint required when provenance_policy is locator_and_fingerprint. It contains no Source body."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "provenance_policy": {
+            "const": "locator_and_fingerprint"
+          }
+        },
+        "required": [
+          "provenance_policy"
+        ]
+      },
+      "then": {
+        "required": [
+          "content_fingerprint"
+        ]
+      }
+    }
+  ],
+  "oneOf": [
+    {
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "last_verified_at"
+            ]
+          },
+          {
+            "required": [
+              "verification_evidence_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "required": [
+        "last_verified_at",
+        "verification_evidence_id"
+      ],
+      "properties": {
+        "last_verified_at": {
+          "type": "null"
+        },
+        "verification_evidence_id": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "required": [
+        "last_verified_at",
+        "verification_evidence_id"
+      ],
+      "properties": {
+        "last_verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verification_evidence_id": {
+          "$ref": "#/$defs/object_id"
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "project",
+        "document",
+        "workflow",
+        "knowledge",
+        "decision",
+        "conversation",
+        "profile"
+      ]
+    },
+    "human_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "\\S"
+    },
+    "opaque_locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "\\S"
+    },
+    "retrieval_hint": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "\\S"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "client_id": {
+      "allOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        {
+          "not": {
+            "enum": [
+              "*",
+              "all",
+              "any"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

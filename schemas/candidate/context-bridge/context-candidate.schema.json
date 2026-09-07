@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:context-candidate",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "XINGSHU Context Bridge Candidate Context Candidate",
+  "description": "Portable public-candidate contract for an untrusted discovery or observation result. A Context Candidate is not a Registered Context Reference, has no active-use authority, cannot supply final authorization, and does not activate any runtime capability.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "object_kind",
+    "candidate_id",
+    "context_type",
+    "discovered_name",
+    "source_id",
+    "source_locator"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate",
+      "description": "Candidate contract identity only; not a release, adoption, or activation version."
+    },
+    "object_kind": {
+      "const": "context_candidate"
+    },
+    "candidate_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity of this untrusted Candidate object."
+    },
+    "context_type": {
+      "$ref": "#/$defs/context_type"
+    },
+    "discovered_name": {
+      "$ref": "#/$defs/human_name",
+      "description": "Discovered or suggested human-readable name; not a registered canonical name."
+    },
+    "source_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Provider-neutral identity of the observed Source; it grants no Source access."
+    },
+    "source_locator": {
+      "$ref": "#/$defs/opaque_locator",
+      "description": "Opaque observed Source identity or root anchor. Its presence does not authorize the entire root or any retrieval entry."
+    },
+    "retrieval_hint": {
+      "$ref": "#/$defs/retrieval_hint",
+      "description": "Optional non-authoritative hint for later review."
+    },
+    "content_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Optional fingerprint of an observed Source representation; it is evidence data, not freshness or authorization authority."
+    },
+    "last_verified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "RFC 3339 timestamp for the Candidate discovery or Source observation evidence when verified. It is evidence linkage only, not an authorization, AI freshness assertion, registration record, or active-use authority."
+    },
+    "verification_evidence_id": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/object_id"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Opaque pointer to the verification evidence for this Candidate observation. It is evidence linkage only and creates no authorization, registration, freshness authority, or active-use authority."
+    },
+    "suggested_allowed_clients": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/client_id"
+      },
+      "description": "Optional client suggestions only. This field does not create client access and may be empty."
+    }
+  },
+  "oneOf": [
+    {
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "last_verified_at"
+            ]
+          },
+          {
+            "required": [
+              "verification_evidence_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "required": [
+        "last_verified_at",
+        "verification_evidence_id"
+      ],
+      "properties": {
+        "last_verified_at": {
+          "type": "null"
+        },
+        "verification_evidence_id": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "required": [
+        "last_verified_at",
+        "verification_evidence_id"
+      ],
+      "properties": {
+        "last_verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verification_evidence_id": {
+          "$ref": "#/$defs/object_id"
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "project",
+        "document",
+        "workflow",
+        "knowledge",
+        "decision",
+        "conversation",
+        "profile"
+      ]
+    },
+    "human_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "\\S"
+    },
+    "opaque_locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "\\S"
+    },
+    "retrieval_hint": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "\\S"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "client_id": {
+      "allOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        {
+          "not": {
+            "enum": [
+              "*",
+              "all",
+              "any"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

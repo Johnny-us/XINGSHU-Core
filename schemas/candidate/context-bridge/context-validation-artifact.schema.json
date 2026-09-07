@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xingshu:core:schema:candidate:context-bridge:context-validation-artifact",
+  "$comment": "Public candidate contract with disabled semantics. governance_effect=none; authorization_effect=none; activation_effect=none.",
+  "title": "Context Validation Artifact Candidate",
+  "description": "Provider-neutral deterministic validation result for one exact Context Candidate and Registration Proposal input pair, the exact untrusted review evidence, an identified validation policy, a trusted existing-reference snapshot, and fresh Source observation evidence. A pass outcome means only eligible for human review; it does not create Human Authorization, registration, a Registered Context Reference, or active authority. Schema validity does not prove cross-object equality, policy-byte integrity, snapshot trust or currency, Source-observation correspondence, permanent freshness, or runtime execution integrity; those require a future deterministic validator and trusted runtime boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_kind",
+    "validation_artifact_id",
+    "candidate_id",
+    "candidate_fingerprint",
+    "proposal_id",
+    "proposal_fingerprint",
+    "review_evidence_fingerprint",
+    "validation_policy_id",
+    "validation_policy_version",
+    "existing_reference_snapshot_fingerprint",
+    "source_revalidated_at",
+    "source_observation_fingerprints",
+    "validated_at",
+    "validation_outcome",
+    "issue_codes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "context-bridge-candidate",
+      "description": "Candidate contract identity only; not a release, adoption, or activation version."
+    },
+    "object_kind": {
+      "const": "context_validation_artifact"
+    },
+    "validation_artifact_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity of this deterministic validation result; it is not an authorization identifier."
+    },
+    "candidate_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity linkage to the Candidate input."
+    },
+    "candidate_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Candidate bytes evaluated by a future deterministic chain validator."
+    },
+    "proposal_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Identity linkage to the Registration Proposal input."
+    },
+    "proposal_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Proposal bytes evaluated by a future deterministic chain validator."
+    },
+    "review_evidence_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the exact Primary AI or semantic review-evidence bytes consumed as untrusted input by deterministic validation. Review evidence creates no authority, does not represent AI approval, and carries no review-confidence authority; cross-object equality is deferred to a future deterministic validator."
+    },
+    "validation_policy_id": {
+      "$ref": "#/$defs/object_id",
+      "description": "Provider-neutral bounded machine-readable identity of the deterministic validation policy used for this result. This schema does not include the policy body or prove that trusted policy bytes were unchanged."
+    },
+    "validation_policy_version": {
+      "$ref": "#/$defs/object_id",
+      "description": "Provider-neutral bounded machine-readable version of the deterministic validation policy used for this result. A future deterministic validator must load the trusted policy and verify its identity, version, and applicable bytes."
+    },
+    "existing_reference_snapshot_fingerprint": {
+      "$ref": "#/$defs/sha256_fingerprint",
+      "description": "Fingerprint linkage to the trusted current existing-reference snapshot used during validation. It contains no snapshot body, Reference identity, or registry locator. Schema validity does not prove trusted acquisition, currency, or equality; those remain future deterministic-validator and runtime responsibilities."
+    },
+    "source_revalidated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp at which the current Source observations relied on by this Artifact completed revalidation. It is distinct from validated_at and is not a permanent freshness guarantee."
+    },
+    "source_observation_fingerprints": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/sha256_fingerprint"
+      },
+      "description": "Ordered fingerprints of the fresh Source-observation evidence actually used by validation. The array order must be preserved and duplicate fingerprint values are allowed because distinct authorized entries may yield identical evidence bytes. Fingerprints contain no Source body. Deterministic correspondence with Proposal entries and trusted observations is deferred to a future cross-object validator."
+    },
+    "validated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp recorded for the deterministic validation result; it is not a Human Authorization time."
+    },
+    "validation_outcome": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "needs_review",
+        "reject"
+      ],
+      "description": "Deterministic result only. pass means eligible for human review; needs_review and reject require at least one issue code. Execution errors are outside this business-outcome enum and belong to future validator error handling."
+    },
+    "issue_codes": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/issue_code"
+      },
+      "description": "Provider-neutral stable machine-readable identifiers only. Codes must not embed private values, Source bodies, credentials, locator bodies, or Human conversation content. The complete validator issue taxonomy remains a later phase."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "const": "pass"
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issue_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "enum": [
+              "needs_review",
+              "reject"
+            ]
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issue_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "object_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "sha256_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "issue_code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,127}$"
+    }
+  }
+}
