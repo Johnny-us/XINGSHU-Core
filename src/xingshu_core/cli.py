@@ -13,7 +13,7 @@ from typing import Any, Sequence
 from . import __version__
 from .decisions import Decision
 from .schema_registry import SchemaRegistry, SchemaRegistryError, repository_root
-from .validator import validate_file
+from .validator import _PUBLIC_ROUTES, validate_file
 
 
 class CLIUsageError(ValueError):
@@ -22,7 +22,7 @@ class CLIUsageError(ValueError):
 
 class SafeArgumentParser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
-        raise CLIUsageError(message)
+        raise CLIUsageError("invalid command-line usage")
 
 
 def _version_tuple(value: str) -> tuple[int, int, int]:
@@ -119,7 +119,7 @@ def build_parser() -> SafeArgumentParser:
     validate.add_argument(
         "--type",
         dest="record_type_override",
-        choices=("memory_entry", "knowledge_object", "migration_provenance"),
+        choices=_PUBLIC_ROUTES,
     )
     return parser
 
@@ -127,10 +127,10 @@ def build_parser() -> SafeArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
-    except CLIUsageError as exc:
+    except CLIUsageError:
         print("ERROR", file=sys.stderr)
         print("status: input_error", file=sys.stderr)
-        print(f"message: {exc}", file=sys.stderr)
+        print("message: invalid command-line usage", file=sys.stderr)
         return 4
 
     if args.command == "doctor":
