@@ -1,0 +1,11 @@
+{
+  "schema_version": "context-bridge-candidate",
+  "object_kind": "trusted_client_profile",
+  "profile_id": "synthetic:p3:profile:01",
+  "client_id": "synthetic_p3_client_01",
+  "profile_version": 1,
+  "identity_origin": "owner_controlled",
+  "client_class": "local_tool",
+  "profile_status": "active",
+  "created_at": "2026-01-01T00:00:00Z"
+}

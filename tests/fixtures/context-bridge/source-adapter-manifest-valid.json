@@ -1,0 +1,15 @@
+{
+  "schema_version": "context-bridge-candidate",
+  "object_kind": "source_adapter_manifest",
+  "adapter_id": "synthetic:p3:adapter:01",
+  "adapter_contract_version": "synthetic-p3-v1",
+  "supported_operations": ["capabilities", "list", "stat", "read"],
+  "supported_content_types": ["text/plain"],
+  "default_encoding": "utf-8",
+  "binary_supported": false,
+  "hard_limits": {
+    "max_items": 8,
+    "max_bytes": 4096,
+    "max_depth": 1
+  }
+}

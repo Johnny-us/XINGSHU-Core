@@ -1,0 +1,27 @@
+{
+  "schema_version": "context-bridge-candidate",
+  "object_kind": "derived_provider_metadata",
+  "derived_object_id": "synthetic:p3:derived:01",
+  "provider_id": "synthetic:p3:provider:01",
+  "authority_class": "derived",
+  "rebuildable": true,
+  "usage_class": "lookup_hint_only",
+  "final_authority": false,
+  "authoritative_reference_id": "synthetic:p3:reference:01",
+  "authoritative_reference_fingerprint": "sha256:d69bbd27a2980ec60a6c083f1d025a5d9c33a277ffb99118ae311398ca5912e8",
+  "authoritative_source_id": "synthetic:p3:source:01",
+  "verification_state": "unverified",
+  "freshness_state": "unknown",
+  "usable_for_lookup": false,
+  "provenance": {
+    "derived_at": "2026-01-01T00:00:06Z",
+    "source_observation_fingerprints": [
+      "sha256:be748b6d4e6a9275301d624c51383b651cd3979ec40b0ee83165e1927c6a9deb"
+    ]
+  },
+  "fallback_policy": {
+    "derived_unavailable_behavior": "direct_authoritative_path",
+    "authoritative_unavailable_behavior": "fail_closed"
+  },
+  "created_at": "2026-01-01T00:00:07Z"
+}
