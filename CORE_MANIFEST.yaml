@@ -154,3 +154,39 @@ capabilities:
     authorization_effect: none
     activation_effect: none
     rollback_behavior: uninstall_cli_or_stop_invoking_runnable_validator
+  context_bridge_validation:
+    version: "0.1"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: docs/CLI.md
+    schema_refs:
+      - schemas/candidate/context-bridge/context-candidate.schema.json
+      - schemas/candidate/context-bridge/context-registration-proposal.schema.json
+      - schemas/candidate/context-bridge/context-validation-artifact.schema.json
+      - schemas/candidate/context-bridge/human-authorization-evidence.schema.json
+      - schemas/candidate/context-bridge/registered-context-reference.schema.json
+      - schemas/candidate/context-bridge/context-reference-transition.schema.json
+      - schemas/candidate/context-bridge/source-adapter-contract.schema.json
+      - schemas/candidate/context-bridge/trusted-client-profile.schema.json
+      - schemas/candidate/context-bridge/runtime-binding.schema.json
+      - schemas/candidate/context-bridge/resolve-context.schema.json
+      - schemas/candidate/context-bridge/derived-provider-metadata.schema.json
+    test_refs:
+      - tests/conformance/context-bridge/test_contract_schemas.py
+      - tests/runtime/test_context_bridge_validation.py
+      - tests/runtime/test_source_adapter_validation.py
+      - tests/runtime/test_authority_validation.py
+      - tests/runtime/test_resolve_context_validation.py
+      - tests/runtime/test_schema_registry.py
+      - tests/runtime/test_validator.py
+      - tests/runtime/test_cli.py
+      - tests/compatibility/context-bridge/test_non_interference.py
+      - tests/conformance/v0.3/test_candidate_manifest.py
+      - tests/compatibility/v0.2-v0.3/test_non_interference.py
+    dependencies:
+      runnable_validation_cli: ">=0.4"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_stop_invoking_context_bridge_validation

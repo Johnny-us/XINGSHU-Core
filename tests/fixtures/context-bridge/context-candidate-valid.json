@@ -1,0 +1,11 @@
+{
+  "schema_version": "context-bridge-candidate",
+  "object_kind": "context_candidate",
+  "candidate_id": "synthetic:p3:candidate:01",
+  "context_type": "document",
+  "discovered_name": "Synthetic P3 document — 合成测试文档",
+  "source_id": "synthetic:p3:source:01",
+  "source_locator": "synthetic:source:root",
+  "last_verified_at": "2026-01-01T00:00:01Z",
+  "verification_evidence_id": "synthetic:p3:observation:01"
+}

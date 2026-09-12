@@ -19,7 +19,8 @@ V03_CAPABILITIES = {
     "migration_provenance",
 }
 V04_CAPABILITY = "runnable_validation_cli"
-DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {V04_CAPABILITY}
+CONTEXT_BRIDGE_CAPABILITY = "context_bridge_validation"
+DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY}
 SUPPORTED_CAPABILITY_VERSIONS = {
     "state_separation": "0.2.1",
     "evidence_lifecycle": "0.2",
@@ -234,6 +235,46 @@ class V03NonInterferenceTests(unittest.TestCase):
         self.assertEqual("0.3", record["schema_version"])
         self.assertEqual(before, record)
         self.assertNotIn("transformed_record", result)
+        self.assertEqual([], consumer.parser_calls)
+
+
+class ContextBridgeLimitedConsumerTests(unittest.TestCase):
+    def test_unrequested_context_bridge_is_ignored_without_mutation(self):
+        before = copy.deepcopy(MANIFEST)
+        consumer = MinimalLimitedConsumer()
+        self.assertNotIn(CONTEXT_BRIDGE_CAPABILITY, SUPPORTED_CAPABILITY_VERSIONS)
+        self.assertIs(False, MANIFEST["capabilities"][CONTEXT_BRIDGE_CAPABILITY]["enabled_by_default"])
+        result = consumer.evaluate_manifest(MANIFEST)
+        self.assertEqual({
+            "mode": "continue_v0.2_v0.2.1",
+            "ignored_capabilities": V03_CAPABILITIES | {V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY},
+            "automatic_activation": False,
+            "automatic_adoption": False,
+            "automatic_migration": False,
+        }, result)
+        self.assertEqual(before, MANIFEST)
+        self.assertEqual([], consumer.parser_calls)
+
+    def test_explicit_context_bridge_request_is_unsupported(self):
+        before = copy.deepcopy(MANIFEST)
+        consumer = MinimalLimitedConsumer()
+        result = consumer.evaluate_manifest(MANIFEST, requested_capability=CONTEXT_BRIDGE_CAPABILITY)
+        self.assertEqual({"mode": "blocked", "error_code": "unsupported_capability"}, result)
+        self.assertEqual(before, MANIFEST)
+        self.assertEqual([], consumer.parser_calls)
+
+    def test_unsupported_context_bridge_never_routes_or_migrates_records(self):
+        record = load(ROOT / "tests/fixtures/context-bridge/context-candidate-valid.json")
+        before = copy.deepcopy(record)
+        consumer = MinimalLimitedConsumer()
+        for selected in (False, True):
+            with self.subTest(selected=selected):
+                result = consumer.route_record(record, CONTEXT_BRIDGE_CAPABILITY, selected=selected)
+                self.assertEqual("not_routed", result["status"])
+                self.assertEqual("context-bridge-candidate", result["identity"]["schema_version"])
+                self.assertEqual(object_sha256(before), result["identity"]["sha256"])
+                self.assertNotIn("transformed_record", result)
+                self.assertEqual(before, record)
         self.assertEqual([], consumer.parser_calls)
 
 
