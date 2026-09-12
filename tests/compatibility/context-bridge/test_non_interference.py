@@ -1,6 +1,6 @@
 """Context Bridge（上下文桥）显式验证路由对旧合同的非干扰证据。
 
-只读取仓库内合成样本；不调用真实来源、传输或激活操作，不检查 Manifest。
+只读取静态 Manifest（清单）与仓库内合成样本；不调用真实来源、传输或激活操作。
 object_valid 仅表示对象有效，不产生治理效力、自动采用或运行时启用。
 """
 
@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import xingshu_core
+import yaml
 from xingshu_core import cli, validator as generic
 from xingshu_core import authority_validation as authority
 from xingshu_core import context_bridge_validation as bridge
@@ -175,6 +176,78 @@ class ContextBridgeNonInterferenceTests(unittest.TestCase):
                 self.assertEqual(["candidate_unsupported_route"], [issue.code for issue in result.errors])
                 self.assertNotIn(sentinel, str(result) + json.dumps(result.to_dict()))
                 self.assertEqual(before, record)
+
+
+class ContextBridgeManifestIntegrationTests(unittest.TestCase):
+    def setUp(self):
+        self.manifest = yaml.safe_load((ROOT / "CORE_MANIFEST.yaml").read_text())
+
+    def test_registered_capability_is_optional_and_has_no_activation_effect(self):
+        item = self.manifest["capabilities"]["context_bridge_validation"]
+        self.assertEqual("0.1", item["version"])
+        self.assertEqual("candidate", item["status"])
+        self.assertIs(False, item["enabled_by_default"])
+        self.assertEqual("additive_optional", item["backward_compatibility"])
+        self.assertEqual({"runnable_validation_cli": ">=0.4"}, item["dependencies"])
+        for field in ("governance_effect", "authorization_effect", "activation_effect"):
+            with self.subTest(field=field):
+                self.assertEqual("none", item[field])
+        self.assertEqual("none", self.manifest["governance_effect"])
+        self.assertEqual("not_active", self.manifest["activation_state"])
+
+    def test_disabled_capability_still_allows_explicit_object_cli_validation(self):
+        # 默认禁用约束自动采用，不隐藏已经公开的显式单对象验证入口。
+        before = copy.deepcopy(self.manifest)
+        self.assertIs(False, self.manifest["capabilities"]["context_bridge_validation"]["enabled_by_default"])
+        path = ROOT / "tests/fixtures/context-bridge/context-candidate-valid.json"
+        input_bytes = path.read_bytes()
+        manifest_bytes = (ROOT / "CORE_MANIFEST.yaml").read_bytes()
+        cross = (
+            (bridge, "validate_registration_validation"), (bridge, "validate_registration_chain"),
+            (bridge, "validate_reference_transition"), (authority, "validate_reference_authority"),
+            (source, "validate_source_adapter_exchange"), (resolve, "validate_resolve_context_exchange"),
+        )
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with ExitStack() as stack:
+            spies = []
+            for module, name in cross:
+                spies.append(stack.enter_context(patch.object(module, name, side_effect=AssertionError("cross evidence invoked"))))
+                spies.append(stack.enter_context(patch.object(generic, name, create=True, side_effect=AssertionError("cross evidence invoked"))))
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                code = cli.main(["validate", str(path), "--type", "context_candidate", "--json"])
+            for spy in spies:
+                spy.assert_not_called()
+        report = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual("", stderr.getvalue())
+        self.assertEqual(("pass", "object_valid", "context_candidate", []),
+                         (report["decision"], report["status"], report["record_type"], report["errors"]))
+        self.assertEqual(input_bytes, path.read_bytes())
+        self.assertEqual(manifest_bytes, (ROOT / "CORE_MANIFEST.yaml").read_bytes())
+        self.assertEqual(before, self.manifest)
+        self.assertEqual("not_active", self.manifest["activation_state"])
+        # 这里只验证静态清单和单对象合同，不提供来源访问、身份认证或运行时就绪证明。
+
+    def test_manifest_schema_files_do_not_expand_public_routes(self):
+        registry = SchemaRegistry()
+        internal = registry.discover_context_bridge()
+        expected_public = (
+            "context_candidate", "context_registration_proposal", "context_validation_artifact",
+            "human_authorization_evidence", "registered_context_reference", "context_reference_transition",
+            "source_adapter_manifest", "source_adapter_request", "source_adapter_result", "source_adapter_error",
+            "trusted_client_profile", "runtime_binding", "resolve_context_request", "resolve_context_result",
+            "derived_provider_metadata",
+        )
+        self.assertEqual(16, len(internal))
+        self.assertIn("resolve_context_error", internal)
+        self.assertEqual(11, len(set(internal.values())))
+        refs = self.manifest["capabilities"]["context_bridge_validation"]["schema_refs"]
+        self.assertEqual(11, len(refs))
+        self.assertEqual(set(internal.values()), set(refs))
+        self.assertEqual(15, len(expected_public))
+        self.assertEqual(tuple(LEGACY_REFS) + expected_public, generic._PUBLIC_ROUTES)
+        self.assertNotIn("resolve_context_error", generic._PUBLIC_ROUTES)
+        self.assertEqual(LEGACY_REFS, registry.discover())
 
 
 if __name__ == "__main__":
