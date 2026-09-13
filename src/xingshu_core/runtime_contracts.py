@@ -17,23 +17,55 @@ from typing import Any, Protocol, runtime_checkable
 from .decisions import Decision, ValidationResult
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class SourceAdapterExecution:
+    """本地 Python sidecar（附带数据容器），不是 Schema 对象或新传输响应。
+
+response 只承载既有 source_adapter_result / source_adapter_error，按
+borrowed read-only（借用且只读）约定保存；不修改映射，不冻结其嵌套内容。
+read 成功时，适配器必须提供同次真实来源观察直接取得的原生 bytes；
+运行时原样传递，禁止将 payload.text 重新编码来制造观察证据。权限记录
+原始字节、缓存或历史结果均不能替代来源观察字节。
+
+本容器只检查交接形状，不解码、编码、规范化、修复、散列或比较字节。
+Schema、身份、请求关联、计数、限额、指纹及 provenance（来源追溯）
+仍由既有 P2C 验证器负责。构造成功不证明观察真实，也不隔离同进程突变。
+错误和非 read 成功均不得携带正文 bytes。不提供公开 JSON 序列化入口。
+"""
+
+    response: Mapping[str, Any] = field(repr=False)
+    exact_content_bytes: bytes | None = field(repr=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.response, Mapping):
+            raise TypeError("adapter response must be a mapping")
+        kind = self.response.get("object_kind")
+        if kind not in ("source_adapter_result", "source_adapter_error"):
+            raise ValueError("adapter response must be an existing source result or error")
+        if kind == "source_adapter_result" and self.response.get("operation") == "read":
+            if type(self.exact_content_bytes) is not bytes:
+                raise TypeError("successful read requires native observation bytes")
+        elif self.exact_content_bytes is not None:
+            raise ValueError("error or non-read response cannot carry observation bytes")
+
+
 @runtime_checkable
 class SourceAdapter(Protocol):
     """Provider-neutral（提供方中立）接口；结构匹配不认证适配器。
 
-manifest 返回既有 source_adapter_manifest。execute 只返回既有
-source_adapter_result 或 source_adapter_error；不得修改 request。
+manifest 返回既有 source_adapter_manifest。execute 返回 SourceAdapterExecution，
+其中 response 只承载既有 source_adapter_result 或 source_adapter_error；不得修改 request。
 只有 manifest 声明的操作可执行，允许仅声明 read，不要求实现其他操作。
 接口不解释定位符，也不规定文件系统类型或根目录字段。
 
-执行层必须从本轮真实观察取得 Source content bytes（来源内容字节），
-不得以权限记录原始字节、历史结果或重编码文本冒充它们。本阶段不定义
-额外 wire response（传输响应）或实现观察证据获取。
+适配器通过 sidecar 原样交接本轮实际观察的 Source content bytes（来源内容字节）。
+不得以权限记录原始字节、历史结果或重编码文本冒充它们。本阶段不新增
+wire response（传输响应），不实现真实观察获取。
 """
 
     def manifest(self) -> Mapping[str, Any]: ...
 
-    def execute(self, request: Mapping[str, Any]) -> Mapping[str, Any]: ...
+    def execute(self, request: Mapping[str, Any]) -> SourceAdapterExecution: ...
 
 
 TrustedClock = Callable[[], datetime]

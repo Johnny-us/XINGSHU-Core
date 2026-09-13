@@ -10,6 +10,7 @@ import json
 from contextlib import ExitStack
 from datetime import datetime, timedelta, timezone, tzinfo
 from pathlib import Path
+from typing import get_type_hints
 from unittest.mock import Mock, patch
 
 import pytest
@@ -18,7 +19,7 @@ from xingshu_core import runtime_contracts as contracts
 from xingshu_core.decisions import Decision, ValidationIssue, ValidationResult
 from xingshu_core.runtime_contracts import (
     RuntimeContext, RuntimeExecutionResult, RuntimeFailureCategory,
-    RuntimeLocalFailure, RuntimeResultKind, SourceAdapter,
+    RuntimeLocalFailure, RuntimeResultKind, SourceAdapter, SourceAdapterExecution,
 )
 
 
@@ -39,13 +40,13 @@ class FakeAdapter:
             "hard_limits": {"max_items": 1, "max_bytes": 1024, "max_depth": 0},
         }
 
-    def execute(self, request):
-        return {
+    def execute(self, request) -> SourceAdapterExecution:
+        return SourceAdapterExecution(response={
             "schema_version": "context-bridge-candidate", "object_kind": "source_adapter_error",
             "request_id": request["request_id"], "adapter_id": "synthetic-p4-adapter",
             "operation": "read", "error_code": "not_found", "retryable": False,
             "observed_at": "2026-01-01T00:00:00Z",
-        }
+        }, exact_content_bytes=None)
 
 
 def context_arguments():
@@ -86,7 +87,11 @@ def test_adapter_protocol_accepts_read_only_fake_without_optional_operations():
     assert adapter.manifest()["supported_operations"] == ["read"]
     request = {"request_id": "synthetic-request", "operation": "read"}
     before = copy.deepcopy(request)
-    assert adapter.execute(request)["object_kind"] == "source_adapter_error"
+    execution = adapter.execute(request)
+    assert type(execution) is SourceAdapterExecution
+    assert execution.response["object_kind"] == "source_adapter_error"
+    assert execution.exact_content_bytes is None
+    assert get_type_hints(SourceAdapter.execute)["return"] is SourceAdapterExecution
     assert request == before
     assert not any(hasattr(adapter, name) for name in ("list", "stat", "capabilities"))
     assert {name for name in SourceAdapter.__dict__ if not name.startswith("_")} == {"manifest", "execute"}
@@ -99,6 +104,8 @@ def test_contract_module_has_only_provider_neutral_dependencies():
     imported = {node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
     assert imported == {"__future__", "collections.abc", "dataclasses", "datetime", "enum", "typing", "decisions"}
     assert not any(isinstance(node, ast.Import) for node in ast.walk(tree))
+    assert not any(isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                   and node.func.attr in {"encode", "decode"} for node in ast.walk(tree))
     names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
     assert names.isdisjoint({"Path", "open", "local_filesystem_adapter", "context_runtime", "LocalFilesystemSourceAdapter", "dir_fd", "O_NOFOLLOW", "fstat"})
     assert not any(isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
@@ -313,7 +320,10 @@ def test_shared_contract_does_not_perform_io_or_validation_or_mutate_inputs():
     from xingshu_core import authority_validation, context_bridge_validation, resolve_context_validation, source_adapter_validation, validator
     args = context_arguments()
     result_args = protocol_arguments(RuntimeResultKind.SUCCESS)
+    source_response = {"object_kind": "source_adapter_result", "operation": "read", "payload": {"text": SENTINEL}}
+    raw_observation = b"Synthetic raw observation, deliberately not a payload encoding"
     records = [args[name] for name in ("reference", "client_profile", "runtime_binding")] + [result_args["response"]]
+    records.append(source_response)
     before = copy.deepcopy(records)
     with ExitStack() as stack:
         guards = [stack.enter_context(patch(target, side_effect=AssertionError("unexpected I/O")))
@@ -326,6 +336,79 @@ def test_shared_contract_does_not_perform_io_or_validation_or_mutate_inputs():
         assert context.now() is STAMP
         RuntimeExecutionResult(**result_args)
         RuntimeLocalFailure(category=RuntimeFailureCategory.INVALID_INPUT).to_dict()
+        execution = SourceAdapterExecution(response=source_response, exact_content_bytes=raw_observation)
+        assert execution.response is source_response
+        assert execution.exact_content_bytes is raw_observation
         for guard in guards:
             guard.assert_not_called()
     assert records == before
+
+
+@pytest.mark.parametrize("raw", [b"", b"Synthetic exact bytes\r\n", b"\xff\x00\xef\xbb\xbf"])
+def test_read_handoff_preserves_mapping_and_native_bytes_identity(raw):
+    # 不一致/非 UTF-8 合成值有意不在容器层检查，避免复制 P2C 的职责。
+    response = {"object_kind": "source_adapter_result", "operation": "read",
+                "payload": {"text": SENTINEL, "byte_count": -1, "content_fingerprint": "synthetic-invalid"}}
+    before = copy.deepcopy(response)
+    execution = SourceAdapterExecution(response=response, exact_content_bytes=raw)
+    assert execution.response is response
+    assert execution.exact_content_bytes is raw
+    assert execution.exact_content_bytes == raw
+    assert response == before
+
+
+@pytest.mark.parametrize("raw", [None, bytearray(b"synthetic"), memoryview(b"synthetic"), "synthetic"])
+def test_read_handoff_rejects_missing_or_non_native_bytes(raw):
+    response = {"object_kind": "source_adapter_result", "operation": "read"}
+    with pytest.raises(TypeError, match="native observation bytes"):
+        SourceAdapterExecution(response=response, exact_content_bytes=raw)
+    with pytest.raises(TypeError):
+        SourceAdapterExecution(response=response)
+
+
+@pytest.mark.parametrize("kind,operation", [
+    ("source_adapter_error", "read"),
+    ("source_adapter_result", "capabilities"),
+    ("source_adapter_result", "list"),
+    ("source_adapter_result", "stat"),
+])
+def test_error_and_non_read_handoff_require_none(kind, operation):
+    response = {"object_kind": kind, "operation": operation}
+    execution = SourceAdapterExecution(response=response, exact_content_bytes=None)
+    assert execution.response is response
+    assert execution.exact_content_bytes is None
+    for value in (b"", b"synthetic", bytearray(b"synthetic"), memoryview(b"synthetic"), "synthetic"):
+        with pytest.raises(ValueError, match="cannot carry observation bytes"):
+            SourceAdapterExecution(response=response, exact_content_bytes=value)
+
+
+@pytest.mark.parametrize("response", [None, [], "synthetic", b"synthetic"])
+def test_handoff_rejects_non_mapping_response(response):
+    with pytest.raises(TypeError, match="response must be a mapping"):
+        SourceAdapterExecution(response=response, exact_content_bytes=None)
+
+
+@pytest.mark.parametrize("kind", [None, "source_adapter_manifest", "source_adapter_request", "SourceAdapterExecution", "synthetic_unknown"])
+def test_handoff_does_not_introduce_a_new_wire_response(kind):
+    with pytest.raises(ValueError, match="existing source result or error"):
+        SourceAdapterExecution(response={"object_kind": kind}, exact_content_bytes=None)
+
+
+def test_handoff_has_exact_frozen_fields_and_private_repr_without_json_export():
+    text_sentinel = "SYNTHETIC_P4_SOURCE_TEXT_SENTINEL"
+    byte_sentinel = b"SYNTHETIC_P4_EXACT_BYTE_SENTINEL"
+    execution = SourceAdapterExecution(
+        response={"object_kind": "source_adapter_result", "operation": "read", "payload": {"text": text_sentinel}},
+        exact_content_bytes=byte_sentinel,
+    )
+    fields = dataclasses.fields(execution)
+    assert [f.name for f in fields] == ["response", "exact_content_bytes"]
+    assert all(f.repr is False and f.kw_only for f in fields)
+    assert repr(execution) == "SourceAdapterExecution()"
+    assert text_sentinel not in repr(execution)
+    assert "SYNTHETIC_P4_EXACT_BYTE_SENTINEL" not in repr(execution)
+    assert not hasattr(execution, "to_dict")
+    assert not hasattr(execution, "__dict__")
+    for name in ("response", "exact_content_bytes"):
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            setattr(execution, name, None)
