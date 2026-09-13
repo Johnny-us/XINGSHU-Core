@@ -228,6 +228,158 @@ def test_replace_between_lstat_and_open_is_detected(tmp_path, monkeypatch):
     check_error(adapter, query, adapter.execute(query), "source_unavailable")
 
 
+@pytest.mark.parametrize("level", ["nested", "deeper"])
+@pytest.mark.parametrize("change,code", [
+    ("rename_recreate", "source_unavailable"), ("replacement", "source_unavailable"),
+    ("symlink", "containment_failed"), ("missing", "source_unavailable"),
+    ("cross_device", "containment_failed"),
+])
+def test_intermediate_namespace_changes_during_read(tmp_path, monkeypatch, level, change, code):
+    root = tmp_path / "root"
+    leaf = root / "nested" / "deeper"
+    leaf.mkdir(parents=True)
+    (leaf / "note.md").write_bytes(b"original")
+    selected = root / "nested" if level == "nested" else leaf
+    selected_inode = selected.stat().st_ino
+    replacement = tmp_path / "replacement"
+    replacement_leaf = replacement / "deeper" if level == "nested" else replacement
+    replacement_leaf.mkdir(parents=True)
+    (replacement_leaf / "note.md").write_bytes(SENTINEL.encode())
+    adapter = make_adapter(root)
+    live, opened, closed = track_descriptors(monkeypatch)
+    real_read, real_fstat, tracking_open = os.read, os.fstat, os.open
+    final_opens, read_fds, chunks = [], [], []
+    mutated = False
+
+    def open_fd(name, *args, **kwargs):
+        fd = tracking_open(name, *args, **kwargs)
+        if name == "note.md":
+            final_opens.append(fd)
+        return fd
+
+    def fstat(fd):
+        info = real_fstat(fd)
+        if change == "cross_device" and mutated and info.st_ino == selected_inode:
+            return replaced_stat(info, st_dev=info.st_dev + 1)
+        return info
+
+    def read(fd, count):
+        nonlocal mutated
+        value = real_read(fd, count)
+        read_fds.append(fd)
+        chunks.append(value)
+        if not mutated:
+            mutated = True
+            if change != "cross_device":
+                selected.rename(tmp_path / "old-directory")
+                if change == "rename_recreate":
+                    new_leaf = selected / "deeper" if level == "nested" else selected
+                    new_leaf.mkdir(parents=True)
+                    (new_leaf / "note.md").write_bytes(SENTINEL.encode())
+                    assert selected.stat().st_ino != selected_inode
+                elif change == "replacement":
+                    replacement.rename(selected)
+                    assert selected.stat().st_ino != selected_inode
+                elif change == "symlink":
+                    selected.symlink_to(replacement, target_is_directory=True)
+        return value
+
+    monkeypatch.setattr(os, "open", open_fd)
+    monkeypatch.setattr(os, "fstat", fstat)
+    monkeypatch.setattr(os, "read", read)
+    query = request("nested/deeper/note.md")
+    execution = adapter.execute(query)
+    check_error(adapter, query, execution, code)
+    assert b"".join(chunks) == b"original"
+    assert SENTINEL not in json.dumps(execution.response)
+    assert len(final_opens) == 1 and set(read_fds) == set(final_opens)
+    assert not live and len(opened) == len(closed)
+
+
+@pytest.mark.parametrize("change,code", [
+    ("hardlink", "containment_failed"), ("rewrite", "source_unavailable"),
+    ("symlink", "containment_failed"), ("directory", "source_unavailable"),
+    ("missing", "source_unavailable"),
+])
+def test_final_namespace_change_after_fstat(tmp_path, monkeypatch, change, code):
+    nested = tmp_path / "nested"
+    nested.mkdir()
+    target = nested / "note.md"
+    target.write_bytes(b"original")
+    adapter = make_adapter(tmp_path)
+    real_revalidate, real_check = adapter._revalidate_namespace, adapter._check_file
+    checked_links, calls = [], []
+    live, opened, closed = track_descriptors(monkeypatch)
+    real_read = os.read
+    reads = []
+
+    def read(fd, count):
+        value = real_read(fd, count)
+        reads.append(value)
+        return value
+
+    def check_file(info):
+        checked_links.append(info.st_nlink)
+        return real_check(info)
+
+    def revalidate(parts, identities, after):
+        calls.append((tuple(identities), after.st_ino))
+        assert after.st_nlink == 1
+        assert target.stat().st_ino == after.st_ino
+        if change == "hardlink":
+            os.link(target, tmp_path / "extra-link.md")
+        elif change == "rewrite":
+            target.write_bytes(b"modified")  # 同 inode、同大小，稳定元数据仍须比较。
+            os.utime(target, ns=(after.st_atime_ns, after.st_mtime_ns + 1000000))
+        else:
+            target.rename(nested / "old.md")
+            if change == "symlink":
+                target.symlink_to(nested / "old.md")
+            elif change == "directory":
+                target.mkdir()
+        return real_revalidate(parts, identities, after)
+
+    monkeypatch.setattr(os, "read", read)
+    monkeypatch.setattr(adapter, "_check_file", check_file)
+    monkeypatch.setattr(adapter, "_revalidate_namespace", revalidate)
+    query = request("nested/note.md")
+    execution = adapter.execute(query)
+    check_error(adapter, query, execution, code)
+    assert len(calls) == 1 and b"".join(reads) == b"original"
+    if change == "hardlink":
+        assert checked_links[-1] == 2  # 在 after-fstat 之后重新执行硬链接策略。
+    assert not live and len(opened) == len(closed)
+
+
+def test_unchanged_nested_namespace_revalidated_without_body_reread(tmp_path, monkeypatch):
+    leaf = tmp_path / "nested" / "deeper"
+    leaf.mkdir(parents=True)
+    (leaf / "note.md").write_bytes(b"unchanged")
+    expected = [(directory.stat().st_dev, directory.stat().st_ino)
+                for directory in (tmp_path / "nested", leaf)]
+    adapter = make_adapter(tmp_path)
+    real_revalidate, real_open = adapter._revalidate_namespace, os.open
+    names, observed_identities = [], []
+
+    def open_fd(name, *args, **kwargs):
+        names.append(name)
+        return real_open(name, *args, **kwargs)
+
+    def revalidate(parts, identities, after):
+        observed_identities.extend(identities)
+        return real_revalidate(parts, identities, after)
+
+    monkeypatch.setattr(os, "open", open_fd)
+    monkeypatch.setattr(adapter, "_revalidate_namespace", revalidate)
+    query = request("nested/deeper/note.md")
+    execution = adapter.execute(query)
+    check_exchange(adapter, query, execution)
+    assert observed_identities == expected
+    assert names.count("nested") == names.count("deeper") == 2
+    assert names.count("note.md") == 1
+    assert execution.exact_content_bytes == b"unchanged"
+
+
 def track_descriptors(monkeypatch):
     real_open, real_close = os.open, os.close
     live, opened, closed = set(), [], []

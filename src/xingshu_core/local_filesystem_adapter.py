@@ -6,8 +6,10 @@ Authority / Resolve（权限 / 解析）编排，也不授予根目录下所有�
 不适用于网络挂载或会触发下载的占位文件；不建立网络连接或后台任务。
 
 路径组件不跟随符号链接，固定根设备/inode，拒绝跨设备及多硬链接文件。
-同句柄前后状态检查降低 TOCTOU（检查与使用竞态）风险，不是针对恶意
-同权限进程的原子快照保证。只读指应用不写回，不承诺操作系统不更新 atime。
+同句柄前后状态检查及返回前完整路径重验降低 rename/replacement/hardlink
+TOCTOU（检查与使用竞态）风险。最终检查之后仍存在一般文件系统并发的
+理论竞态窗口，不提供原子快照或针对同权限恶意写入者的隔离保证。
+只读指应用不写回，不承诺操作系统不更新 atime。
 """
 
 from __future__ import annotations
@@ -162,11 +164,13 @@ root 必须是绝对物理目录路径，所有组件均不能是符号链接；
             parent = self._open_root(stack)
             if _identity(os.fstat(parent)) != self._root_identity:
                 raise _SourceFailure("containment_failed")
+            directory_identities: list[tuple[int, int]] = []
             for part in parts[:-1]:
                 parent = _opened(stack, part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, parent=parent)
                 info = os.fstat(parent)
                 if not stat.S_ISDIR(info.st_mode) or info.st_dev != self._root_identity[0]:
                     raise _SourceFailure("containment_failed")
+                directory_identities.append(_identity(info))
             entry = os.stat(parts[-1], dir_fd=parent, follow_symlinks=False)
             self._check_file(entry)
             fd = _opened(stack, parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_NOCTTY, parent=parent)
@@ -190,20 +194,44 @@ root 必须是绝对物理目录路径，所有组件均不能是符号链接；
             if _stability(before) != _stability(after) or count != after.st_size:
                 raise _SourceFailure("source_unavailable")
             self._check_file(after)
-            current = os.stat(parts[-1], dir_fd=parent, follow_symlinks=False)
-            if _identity(current) != _identity(after):
-                raise _SourceFailure("source_unavailable")
-            if _identity(os.fstat(self._open_root(stack))) != self._root_identity:
-                raise _SourceFailure("containment_failed")
+            self._revalidate_namespace(parts, directory_identities, after)
             # 只拼接 os.read 直接返回的 bytes；不是正文的重新编码。
             return b"".join(chunks)
+
+    def _revalidate_namespace(self, parts: list[str], directory_identities: list[tuple[int, int]],
+                              after: os.stat_result) -> None:
+        """从当前可信根重新遍历原定位符；只检查元数据，不重读正文或重试。"""
+        try:
+            with ExitStack() as stack:
+                parent = self._open_root(stack)
+                if _identity(os.fstat(parent)) != self._root_identity:
+                    raise _SourceFailure("containment_failed")
+                for part, expected in zip(parts[:-1], directory_identities, strict=True):
+                    parent = _opened(stack, part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, parent=parent)
+                    info = os.fstat(parent)
+                    if not stat.S_ISDIR(info.st_mode) or info.st_dev != self._root_identity[0]:
+                        raise _SourceFailure("containment_failed")
+                    if _identity(info) != expected:
+                        raise _SourceFailure("source_unavailable")
+                current = os.stat(parts[-1], dir_fd=parent, follow_symlinks=False)
+                # 初始目标已经是普通文件；重验时的类型变化属于来源漂移。
+                if not stat.S_ISREG(current.st_mode) and not stat.S_ISLNK(current.st_mode):
+                    raise _SourceFailure("source_unavailable")
+                self._check_file(current)
+                if _stability(current) != _stability(after):
+                    raise _SourceFailure("source_unavailable")
+        except OSError as failure:
+            if failure.errno == errno.ENOENT:
+                # 首次定位成功后消失，不是首次请求就找不到目标。
+                raise _SourceFailure("source_unavailable") from None
+            raise
 
     def _check_file(self, info: os.stat_result) -> None:
         if stat.S_ISLNK(info.st_mode) or info.st_dev != self._root_identity[0]:
             raise _SourceFailure("containment_failed")
         if not stat.S_ISREG(info.st_mode):
             raise _SourceFailure("unsupported_content_type")
-        if info.st_nlink > 1:
+        if info.st_nlink != 1:
             raise _SourceFailure("containment_failed")
 
     def _error(self, request: Mapping[str, Any], code: str) -> SourceAdapterExecution:
