@@ -150,6 +150,17 @@ def resolve_registered_context(request: Mapping[str, Any], *, context: RuntimeCo
             exchange["exact_content_bytes"] = raw
         category = RuntimeFailureCategory.EXECUTION_UNAVAILABLE
         verified_at = _now(context)
+        # 披露前门禁复用第二次可信时间及同一权限快照。保留首次 evaluated_at，
+        # 使 P2E 仍能验证读取前授权 <= 来源观察 <= 验证/解析时间的证据顺序。
+        # 第二份上下文仅供 Runtime 内部检查，不扩展冻结的 resolution_context。
+        post_read_authority_context = {**authority_context, "evaluated_at": verified_at}
+        post_read_authority = validate_reference_authority(
+            reference, profile, binding, authority_context=post_read_authority_context, registry=registry,
+        )
+        if (post_read_authority.decision is not Decision.PASS
+                or post_read_authority.status != "authority_context_eligible"):
+            return _failure(RuntimeFailureCategory.EXECUTION_UNAVAILABLE
+                            if post_read_authority.decision is Decision.ERROR else RuntimeFailureCategory.INVALID_INPUT)
         resolution_context = {
             "reference": reference, "client_profile": profile, "runtime_binding": binding,
             "authority_context": authority_context, "resolved_at": verified_at,

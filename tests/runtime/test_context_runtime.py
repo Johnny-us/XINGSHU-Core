@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from xingshu_core import context_runtime as runtime
-from xingshu_core.decisions import Decision
+from xingshu_core.decisions import Decision, ValidationIssue
 from xingshu_core.runtime_contracts import RuntimeFailureCategory as Category, RuntimeResultKind as Kind
 from xingshu_core.source_adapter_validation import validate_source_adapter_object
 
@@ -35,7 +35,7 @@ def test_happy_path_order_exact_bytes_and_real_validation(monkeypatch):
     ctx, query, events = context(case), case["request"], case["events"]
     original_query = copy.deepcopy(query)
     original_records = [copy.deepcopy(getattr(ctx, key)) for key in ("reference", "client_profile", "runtime_binding")]
-    captured = {}
+    captured = {"authority_contexts": [], "authority_objects": []}
     ids = iter(("synthetic-new-source-id", "synthetic-new-verification-id"))
     monkeypatch.setattr(runtime, "_new_id", lambda: next(ids))
     originals = {name: getattr(runtime, name) for name in (
@@ -48,8 +48,11 @@ def test_happy_path_order_exact_bytes_and_real_validation(monkeypatch):
         return originals["validate_resolve_context_object"](*args, **kwargs)
 
     def authority_check(*args, **kwargs):
-        events.append("authority")
-        assert case["adapter"].manifest_calls == case["adapter"].execute_calls == 0
+        index = len(captured["authority_contexts"])
+        events.append("authority_pre_read" if index == 0 else "authority_post_read")
+        assert case["adapter"].manifest_calls == case["adapter"].execute_calls == index
+        captured["authority_contexts"].append(kwargs["authority_context"])
+        captured["authority_objects"].append(args)
         blobs = kwargs["authority_context"]["object_bytes"]
         assert blobs["registered_context_reference"] is ctx.reference_bytes
         assert blobs["trusted_client_profile"] is ctx.client_profile_bytes
@@ -71,6 +74,11 @@ def test_happy_path_order_exact_bytes_and_real_validation(monkeypatch):
     def final_check(*args, **kwargs):
         events.append("p2e")
         captured["resolution_context"] = kwargs["resolution_context"]
+        assert kwargs["resolution_context"]["authority_context"] is captured["authority_contexts"][0]
+        assert set(kwargs["resolution_context"]) == {
+            "reference", "client_profile", "runtime_binding", "authority_context",
+            "resolved_at", "source_exchanges", "resolution_event",
+        }
         assert kwargs["resolution_context"]["source_exchanges"][0]["exact_content_bytes"] is case["adapter"].raw
         result = originals["validate_resolve_context_exchange"](*args, **kwargs)
         assert result.decision is Decision.PASS and result.status == "resolve_exchange_valid", result
@@ -82,7 +90,17 @@ def test_happy_path_order_exact_bytes_and_real_validation(monkeypatch):
     outcome = runtime.resolve_registered_context(query, context=ctx)
     assert outcome.kind is Kind.SUCCESS
     assert outcome.validation is captured["receipt"]
-    assert events == ["request_validation", "clock", "authority", "manifest", "execute", "p2c", "clock", "p2e"]
+    assert events == ["request_validation", "clock", "authority_pre_read", "manifest", "execute",
+                      "p2c", "clock", "authority_post_read", "p2e"]
+    first, second = captured["authority_contexts"]
+    assert first is not second
+    assert first["evaluated_at"] == fixtures.utc_timestamp(6)
+    assert second["evaluated_at"] == fixtures.utc_timestamp(8)
+    for key in ("object_bytes", "control_plane_selection"):
+        assert first[key] is second[key]
+    assert first["operation"] == second["operation"] == "resolve_context"
+    assert {**first, "evaluated_at": second["evaluated_at"]} == second
+    assert all(left is right for left, right in zip(*captured["authority_objects"], strict=True))
     assert case["adapter"].manifest_calls == case["adapter"].execute_calls == 1
     assert query == original_query
     assert [getattr(ctx, key) for key in ("reference", "client_profile", "runtime_binding")] == original_records
@@ -239,6 +257,112 @@ def test_supported_source_errors_require_real_p2e_receipt(code, monkeypatch):
     assert outcome.response["error_code"] == code
     assert "payload" not in outcome.response
     assert case["adapter"].execute_calls == 1
+
+
+@pytest.mark.parametrize("source_code", [None, "source_unavailable", "limit_exceeded"])
+@pytest.mark.parametrize("expiry", [7, 8, 9])
+def test_post_read_expiry_gates_success_and_source_errors(monkeypatch, source_code, expiry):
+    """读取前时间为 6，披露检查为 8；真实 P2D 判断中途/恰好/稍后到期。"""
+    case = make_case()
+    case["arguments"]["client_profile"]["expires_at"] = fixtures.utc_timestamp(expiry)
+    case["adapter"].raw = SENTINEL.encode()
+    case["adapter"].code = source_code
+    rebind(case)
+    ctx = context(case)
+    original_authority = runtime.validate_reference_authority
+    original_source = runtime.validate_source_adapter_exchange
+    original_final = runtime.validate_resolve_context_exchange
+    authorities, source_checks, finals = [], [], []
+
+    def authority(*args, **kwargs):
+        result = original_authority(*args, **kwargs)
+        authorities.append((kwargs["authority_context"], result))
+        return result
+
+    def source(*args, **kwargs):
+        result = original_source(*args, **kwargs)
+        assert result.decision is Decision.PASS
+        assert result.status == ("exchange_valid" if source_code is None else "exchange_error_valid")
+        source_checks.append(result)
+        return result
+
+    def final(*args, **kwargs):
+        assert expiry > 8, "Expired authority must stop before P2E"
+        assert kwargs["resolution_context"]["authority_context"] is authorities[0][0]
+        result = original_final(*args, **kwargs)
+        finals.append(result)
+        return result
+
+    monkeypatch.setattr(runtime, "validate_reference_authority", authority)
+    monkeypatch.setattr(runtime, "validate_source_adapter_exchange", source)
+    monkeypatch.setattr(runtime, "validate_resolve_context_exchange", final)
+    outcome = runtime.resolve_registered_context(case["request"], context=ctx)
+    assert len(authorities) == 2 and len(source_checks) == 1
+    assert authorities[0][0]["evaluated_at"] == fixtures.utc_timestamp(6)
+    assert authorities[1][0]["evaluated_at"] == fixtures.utc_timestamp(8)
+    assert authorities[0][1].decision is Decision.PASS
+    assert case["events"].count("clock") == 2
+    assert case["adapter"].manifest_calls == case["adapter"].execute_calls == 1
+    if expiry <= 8:
+        assert authorities[1][1].decision is Decision.REJECT
+        assert "authority_profile_expired" in {issue.code for issue in authorities[1][1].errors}
+        assert_local(outcome, Category.INVALID_INPUT)
+        assert not finals
+        rendered = repr(outcome) + json.dumps(outcome.local_failure.to_dict())
+        for private in (fixtures.utc_timestamp(expiry), ctx.selected_client_id,
+                        ctx.reference["source_locator"], ctx.reference_bytes.decode(),
+                        "authority_profile_expired", SENTINEL):
+            assert private not in rendered
+    else:
+        assert authorities[1][1].decision is Decision.PASS
+        assert len(finals) == 1 and finals[0].decision is Decision.PASS
+        assert outcome.validation is finals[0]
+        assert outcome.kind is (Kind.SUCCESS if source_code is None else Kind.PROTOCOL_ERROR)
+
+
+@pytest.mark.parametrize("source_code", [None, "source_unavailable", "limit_exceeded"])
+@pytest.mark.parametrize("post_decision", [Decision.ERROR, Decision.REJECT, Decision.NEEDS_REVIEW, Decision.PASS, "exception"])
+def test_post_read_authority_noneligible_is_sanitized_without_retry(monkeypatch, source_code, post_decision):
+    case = make_case()
+    case["adapter"].code = source_code
+    case["adapter"].raw = SENTINEL.encode()
+    original_authority = runtime.validate_reference_authority
+    original_source = runtime.validate_source_adapter_exchange
+    calls, source_checks = [], []
+
+    def source(*args, **kwargs):
+        result = original_source(*args, **kwargs)
+        assert result.decision is Decision.PASS
+        source_checks.append(result)
+        return result
+
+    def authority(*args, **kwargs):
+        result = original_authority(*args, **kwargs)
+        assert result.decision is Decision.PASS
+        calls.append(kwargs["authority_context"])
+        if len(calls) == 1:
+            return result
+        assert len(source_checks) == 1
+        if post_decision == "exception":
+            raise RuntimeError(SENTINEL + " /synthetic/private credential-synthetic")
+        # PASS 但非 eligible 同样不能放行；诊断哨兵不能进入本地失败。
+        return dataclasses.replace(result, decision=post_decision, status="synthetic-ineligible",
+                                   errors=(ValidationIssue("synthetic-diagnostic", "/synthetic/private", SENTINEL),))
+
+    def forbidden_final(*_args, **_kwargs):
+        pytest.fail("Second authority gate must prevent P2E")
+
+    monkeypatch.setattr(runtime, "validate_reference_authority", authority)
+    monkeypatch.setattr(runtime, "validate_source_adapter_exchange", source)
+    monkeypatch.setattr(runtime, "validate_resolve_context_exchange", forbidden_final)
+    outcome = runtime.resolve_registered_context(case["request"], context=context(case))
+    expected = Category.EXECUTION_UNAVAILABLE if post_decision in (Decision.ERROR, "exception") else Category.INVALID_INPUT
+    assert_local(outcome, expected)
+    assert len(calls) == 2
+    assert case["events"].count("clock") == 2
+    assert case["adapter"].manifest_calls == case["adapter"].execute_calls == 1
+    rendered = repr(outcome) + json.dumps(outcome.local_failure.to_dict())
+    assert "synthetic-diagnostic" not in rendered
 
 
 @pytest.mark.parametrize("code", ["not_found", "containment_failed", "unsupported_encoding", "provenance_unavailable"])
