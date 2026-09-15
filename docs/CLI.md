@@ -4,7 +4,7 @@ system: xingshu-2.0
 scope: public-core
 status: candidate
 version: 0.4-candidate
-updated: 2026-09-10
+updated: 2026-09-15
 governance_effect: none
 authorization_effect: none
 activation_effect: none
@@ -15,6 +15,15 @@ visibility: public
 # XINGSHU Validator CLI（验证器命令行）
 
 XINGSHU-Core 提供 Read-Only Validator（只读验证器），读取一个 JSON Object（JSON 对象），按固定公开白名单选择 Legacy（旧记录）或 Context Bridge Candidate（上下文桥接候选）单对象验证，返回稳定的 Decision（决定）。
+
+## 两个独立入口
+
+| 入口 | 职责 |
+|---|---|
+| Existing Validator CLI（既有验证器命令行）：`xingshu doctor` / `xingshu validate` | 环境检查及既有单对象验证，不执行上下文 Runtime（运行时） |
+| Candidate Runtime CLI（候选运行时命令行）：`python -m xingshu_core.runtime_cli resolve-local ...` | 所有者显式提供授权文件与本地 root，单次读取明确获准的 Markdown 入口 |
+
+P4 v0.1 Candidate 暂不合并到现有 `xingshu` 主命令；没有新增 package entry point（包命令入口）。下文既有验证器的路线、JSON 策略、结果和退出码保持原义；独立 Runtime 的用法见本文末节和[专门说明](LOCAL_READ_ONLY_CONTEXT_RUNTIME.md)。
 
 ## 安装与命令
 
@@ -93,7 +102,7 @@ xingshu validate FILE.json --type context_candidate --json
 
 候选入口原样返回专用 `ValidationResult`（验证结果），保留 `object_valid`、`error_envelope_valid` 等状态，不统一改成 `accepted`。Source Adapter（来源适配器）错误信封的 `PASS/error_envelope_valid` 只证明信封有效，不表示来源操作成功。
 
-下列六个跨证据 API 仅供显式库调用，通用 `validate_record`、`validate_file` 和 CLI 不调用：
+下列六个跨证据 API 仅供显式库调用，通用 `validate_record`、`validate_file` 和现有 `xingshu` Validator CLI 不调用：
 
 ```text
 validate_source_adapter_exchange
@@ -167,3 +176,38 @@ message: invalid command-line usage
 候选能力保持 disabled by default（默认禁用），`governance_effect=none`、`authorization_effect=none`、`activation_effect=none`。CLI 暴露单对象验证入口不等于 Runtime Activation（运行时激活），不启用服务、Gateway（网关）、来源适配器实现、网络、Provider 调用、凭据加载、Memory Store（记忆存储）或后台进程。验证只读取指定 JSON 文件及所需本地 Schema，不读取 JSON 中的来源定位符；不修改、移动或删除输入，不执行用户命令，不使用 `eval/exec`，不上传数据或访问账号。
 
 单对象 PASS 不代表 Human Authorization（人类授权）、Registration Complete（登记完成）、Source Authoritative Observation Proof（来源权威观察证明）、Authority Eligible（权限资格成立）、Resolve Success（解析成功）、Runtime Active（运行时已激活）、Product Ready（产品就绪）或 Production Ready（生产就绪）。derived 的 PASS 仅证明冻结 Schema 有效，不证明来源已核验、当前来源事实、元数据具有权威性或运行时 Provider 可用。
+
+## 独立 Candidate Runtime CLI
+
+`local_read_only_context_runtime` 是独立 capability（能力），版本 `0.1`、`candidate`、disabled by default（默认关闭）、not active（未激活）；它不替换 `context_bridge_validation`，也不改变现有验证器行为。Manifest 登记没有治理、授权或激活效力。默认关闭是候选采用状态，不是阻止显式模块调用的功能开关。
+
+在上述仓库可编辑安装环境中，可查看静态帮助；以下执行示例全部为占位输入：
+
+```bash
+python -m xingshu_core.runtime_cli --help
+python -m xingshu_core.runtime_cli resolve-local --help
+python -m xingshu_core.runtime_cli resolve-local \
+  --reference ./reference.json \
+  --client-profile ./client-profile.json \
+  --runtime-binding ./runtime-binding.json \
+  --request ./request.json \
+  --root /absolute/path/to/synthetic-vault \
+  --scope-id example-scope \
+  --adapter-id example-localfs \
+  --json
+```
+
+`--root` 必须是显式绝对物理目录路径，组件不能为符号链接。不能使用 `./synthetic-vault`，也不从 `source_locator` 推导 root。可选 `--max-bytes N` 设置 LocalFS 硬上限（1 至 1048576，默认 1048576），不改写请求文件。没有 force、skip-validation、自动登记或授权选项。
+
+Host（宿主）对四份 JSON 使用严格 UTF-8、对象根和所有层级重复键拒绝策略，保留前三份授权文件的原始字节；这不改变上文既有 Validator 的 JSON 行为。
+
+| Runtime 结果 | 独立退出码 | 输出 |
+|---|---:|---|
+| `SUCCESS` | `0` | JSON 模式 stdout 仅为 `resolve_context_result`；人类模式为 SUCCESS、resolved 及正文交付区 |
+| validated `PROTOCOL_ERROR` | `2` | JSON 模式 stdout 仅为经 P2E 验证的 `resolve_context_error`；人类模式输出固定标题及错误码 |
+| `LOCAL_EXECUTION_FAILURE` | `3` | JSON 模式 stdout 仅为 kind、固定 category/message；人类模式向 stderr 输出固定分类和消息 |
+| Host / invocation error（宿主输入或用法错误） | `4` | 固定安全宿主错误；JSON 模式 stdout，人类模式 stderr |
+
+这里的 `2` 不表示 Validator 的 NEEDS_REVIEW，`3` 也不表示 Validator 的 REJECT。协议错误、本地执行失败和宿主输入错误是不同边界，不能互换。用法错误不回显参数值或路径，正常 `--help` 只输出静态帮助。
+
+成功正文是明确的交付内容；失败不附带正文、授权原始字节、绝对 root、凭据、异常或验证诊断。详见[执行链、候选安全边界、隐私和限制](LOCAL_READ_ONLY_CONTEXT_RUNTIME.md)。

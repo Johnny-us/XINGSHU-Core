@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -143,6 +144,55 @@ class ContextBridgeCandidateManifestTests(unittest.TestCase):
                 self.assertTrue(path.name.startswith("test_"))
                 self.assertEqual(".py", path.suffix)
                 self.assertTrue({"fixtures", "support", "docs", "src"}.isdisjoint(path.parts))
+
+
+class LocalRuntimeCandidateMetadataTests(unittest.TestCase):
+    """P4F：只验证候选元数据，不改变冻结的 Runtime 执行测试。"""
+
+    def test_runtime_is_a_separate_disabled_non_effect_capability(self):
+        item = MANIFEST["capabilities"]["local_read_only_context_runtime"]
+        self.assertEqual("0.1", item["version"])
+        self.assertEqual("candidate", item["status"])
+        self.assertIs(False, item["enabled_by_default"])
+        self.assertEqual("not_active", MANIFEST["activation_state"])
+        for effect in ("governance_effect", "authorization_effect", "activation_effect"):
+            self.assertEqual("none", item[effect])
+        self.assertEqual("additive_optional", item["backward_compatibility"])
+        self.assertEqual({"context_bridge_validation": ">=0.1"}, item["dependencies"])
+        self.assertEqual("docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md", item["spec_ref"])
+        self.assertTrue(set(item["schema_refs"]) <= set(CONTEXT_BRIDGE_SCHEMA_REFS))
+        self.assertEqual(len(item["schema_refs"]), len(set(item["schema_refs"])))
+        for ref in [item["spec_ref"], *item["schema_refs"], *item["test_refs"]]:
+            self.assertTrue((ROOT / ref).is_file(), ref)
+        # ContextBridgeCandidateManifestTests 继续独立固定既有验证能力的完整语义。
+        self.assertIsNot(item, MANIFEST["capabilities"]["context_bridge_validation"])
+
+    def test_runtime_docs_match_candidate_state_and_separate_entry(self):
+        runtime_doc = (ROOT / "docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md").read_text()
+        metadata = yaml.safe_load(runtime_doc.split("---", 2)[1])
+        self.assertEqual("candidate", metadata["status"])
+        self.assertEqual("0.1", metadata["version"])
+        self.assertIs(False, metadata["enabled_by_default"])
+        self.assertEqual("not_active", metadata["activation_state"])
+        for effect in ("governance_effect", "authorization_effect", "activation_effect"):
+            self.assertEqual("none", metadata[effect])
+        cli_doc = (ROOT / "docs/CLI.md").read_text()
+        for doc in (runtime_doc, cli_doc):
+            self.assertIn("python -m xingshu_core.runtime_cli resolve-local", doc)
+            self.assertIn("xingshu doctor", doc)
+            self.assertIn("xingshu validate", doc)
+            self.assertIn("/absolute/path/to/synthetic-vault", doc)
+        test_doc = (ROOT / "tests/README.md").read_text()
+        for ref in MANIFEST["capabilities"]["local_read_only_context_runtime"]["test_refs"]:
+            self.assertIn(str(Path(ref).relative_to("tests")), test_doc)
+
+    def test_runtime_documentation_does_not_assert_release_or_isolation(self):
+        claims = re.compile(r"active runtime|production ready|stable runtime|production security|fully secure|"
+                            r"Obsidian integrated|automatic AI memory|cross-app memory already working", re.I)
+        for name in ("docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md", "docs/CLI.md"):
+            for line in (ROOT / name).read_text().splitlines():
+                if claims.search(line):
+                    self.assertRegex(line.lower(), r"不|未|无|\bnot\b|\bno\b", name)
 
 
 if __name__ == "__main__":

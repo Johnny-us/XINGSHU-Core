@@ -20,7 +20,10 @@ V03_CAPABILITIES = {
 }
 V04_CAPABILITY = "runnable_validation_cli"
 CONTEXT_BRIDGE_CAPABILITY = "context_bridge_validation"
-DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY}
+LOCAL_RUNTIME_CAPABILITY = "local_read_only_context_runtime"
+DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {
+    V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY, LOCAL_RUNTIME_CAPABILITY,
+}
 SUPPORTED_CAPABILITY_VERSIONS = {
     "state_separation": "0.2.1",
     "evidence_lifecycle": "0.2",
@@ -247,7 +250,7 @@ class ContextBridgeLimitedConsumerTests(unittest.TestCase):
         result = consumer.evaluate_manifest(MANIFEST)
         self.assertEqual({
             "mode": "continue_v0.2_v0.2.1",
-            "ignored_capabilities": V03_CAPABILITIES | {V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY},
+            "ignored_capabilities": DISABLED_UNSUPPORTED_CAPABILITIES,
             "automatic_activation": False,
             "automatic_adoption": False,
             "automatic_migration": False,
@@ -275,6 +278,24 @@ class ContextBridgeLimitedConsumerTests(unittest.TestCase):
                 self.assertEqual(object_sha256(before), result["identity"]["sha256"])
                 self.assertNotIn("transformed_record", result)
                 self.assertEqual(before, record)
+        self.assertEqual([], consumer.parser_calls)
+
+
+class LocalRuntimeLimitedConsumerTests(unittest.TestCase):
+    def test_runtime_is_ignored_unrequested_and_rejected_when_requested(self):
+        before = copy.deepcopy(MANIFEST)
+        consumer = MinimalLimitedConsumer()
+        self.assertIs(False, MANIFEST["capabilities"][LOCAL_RUNTIME_CAPABILITY]["enabled_by_default"])
+        self.assertNotIn(LOCAL_RUNTIME_CAPABILITY, SUPPORTED_CAPABILITY_VERSIONS)
+        ignored = consumer.evaluate_manifest(MANIFEST)
+        self.assertEqual("continue_v0.2_v0.2.1", ignored["mode"])
+        self.assertIn(LOCAL_RUNTIME_CAPABILITY, ignored["ignored_capabilities"])
+        self.assertFalse(ignored["automatic_activation"])
+        self.assertFalse(ignored["automatic_adoption"])
+        self.assertFalse(ignored["automatic_migration"])
+        self.assertEqual({"mode": "blocked", "error_code": "unsupported_capability"},
+                         consumer.evaluate_manifest(MANIFEST, requested_capability=LOCAL_RUNTIME_CAPABILITY))
+        self.assertEqual(before, MANIFEST)
         self.assertEqual([], consumer.parser_calls)
 
 

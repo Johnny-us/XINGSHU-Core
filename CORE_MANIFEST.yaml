@@ -190,3 +190,31 @@ capabilities:
     authorization_effect: none
     activation_effect: none
     rollback_behavior: disable_capability_and_stop_invoking_context_bridge_validation
+  local_read_only_context_runtime:
+    version: "0.1"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md
+    schema_refs:
+      - schemas/candidate/context-bridge/registered-context-reference.schema.json
+      - schemas/candidate/context-bridge/trusted-client-profile.schema.json
+      - schemas/candidate/context-bridge/runtime-binding.schema.json
+      - schemas/candidate/context-bridge/source-adapter-contract.schema.json
+      - schemas/candidate/context-bridge/resolve-context.schema.json
+    test_refs:
+      - tests/conformance/context-runtime/test_runtime_contract.py
+      - tests/runtime/test_local_filesystem_adapter.py
+      - tests/runtime/test_filesystem_security.py
+      - tests/runtime/test_context_runtime.py
+      - tests/runtime/test_context_runtime_localfs_integration.py
+      - tests/runtime/test_runtime_host.py
+      - tests/runtime/test_runtime_cli.py
+      - tests/conformance/v0.3/test_candidate_manifest.py
+      - tests/compatibility/v0.2-v0.3/test_non_interference.py
+    dependencies:
+      context_bridge_validation: ">=0.1"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_stop_invoking_local_runtime_host
