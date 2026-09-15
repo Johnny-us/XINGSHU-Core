@@ -83,3 +83,51 @@ P3 测试保持 Portable（可移植）、Synthetic（合成）和 Deterministic
 | Resolve 交换有效 | 生产运行时已激活 |
 | 通用 CLI PASS | 跨证据验证已完成 |
 | Derived Metadata（派生元数据） | 具有最终权威性 |
+
+## P4 Local Read-Only Context Runtime（本地只读上下文运行时候选）
+
+P4 v0.1 采用 owner-controlled host（所有者控制的宿主），保持 candidate、默认关闭、未激活。以下证据全部使用合成对象或 `tmp_path` 临时文件，不接触真实账号、私人 Vault 或 Personal Instance。P4D/P4E 的 synthetic real-I/O integration（合成来源真实输入输出集成）不等于生产环境验证。
+
+| 阶段 | 测试入口（相对 `tests/`） | 证据范围 |
+|---|---|---|
+| P4A shared contracts（共享合同） | `conformance/context-runtime/test_runtime_contract.py` | 提供方中立接口、原始字节附带容器、可信上下文与三种互斥结果；不证明真实调用者身份 |
+| P4B LocalFS（本地文件系统适配器） | `runtime/test_local_filesystem_adapter.py`、`runtime/test_filesystem_security.py` | 真实临时 Markdown、有界读取、原始字节、路径包含、硬链接及确定性 namespace（命名空间）变化；不证明恶意同用户隔离 |
+| P4C Runtime Authority（运行时权限） | `runtime/test_context_runtime.py` | 读取前与披露前权限门禁、单次 Source 交换、P2C/P2E、私密失败；该组使用模拟适配器 |
+| P4D Runtime + real synthetic LocalFS | `runtime/test_context_runtime_localfs_integration.py` | 冻结 Runtime 与真实 LocalFS、精确字节、同一路径 A→B 更新、错误语义、到期后不交付 |
+| P4E Host + CLI（宿主与命令行） | `runtime/test_runtime_host.py`、`runtime/test_runtime_cli.py` | 四份显式输入、原始授权字节、重复键拒绝、真实端到端链、独立退出码、隐私与静态模块帮助 |
+| P4F metadata（候选元数据） | `conformance/v0.3/test_candidate_manifest.py`、`compatibility/v0.2-v0.3/test_non_interference.py` | 扩展既有 Manifest 测试，验证独立 Runtime capability、默认关闭、无效力、文档状态及入口一致性；旧 Consumer 未请求时忽略、显式请求时拒绝，不改变执行层测试语义 |
+
+`support/context_runtime_fixtures.py` 为 P4C 内存模拟支持；`support/context_runtime_localfs_fixtures.py` 和 `support/runtime_host_fixtures.py` 为 P4D/P4E 专用合成支持。后两组调用真实适配器与既有验证器，包装器仅记录原调用的证据，确定性时钟不依赖 sleep。测试自行构造授权记录，不构成现实授权。
+
+### 重复运行方法
+
+在仓库根目录、Python 3.11+ 与既有测试依赖就绪的环境运行；采用仓库可编辑安装，或如下面使用 `PYTHONPATH=src`。环境准备见 [CLI 文档](../docs/CLI.md)，依赖保持 [requirements-test.txt](../requirements-test.txt)。
+
+```bash
+PYTHONPATH=src python -m xingshu_core.runtime_cli --help
+PYTHONPATH=src python -m xingshu_core.runtime_cli resolve-local --help
+
+PYTHONPATH=src python -m pytest \
+  tests/runtime/test_runtime_host.py \
+  tests/runtime/test_runtime_cli.py \
+  -v --import-mode=importlib
+
+PYTHONPATH=src python -m pytest \
+  tests/conformance/context-runtime/test_runtime_contract.py \
+  tests/runtime/test_local_filesystem_adapter.py \
+  tests/runtime/test_filesystem_security.py \
+  tests/runtime/test_context_runtime.py \
+  tests/runtime/test_context_runtime_localfs_integration.py \
+  tests/runtime/test_runtime_host.py \
+  tests/runtime/test_runtime_cli.py \
+  tests/conformance/v0.3/test_candidate_manifest.py \
+  tests/compatibility/v0.2-v0.3/test_non_interference.py \
+  -v --import-mode=importlib
+
+PYTHONPATH=src python -m pytest tests/ -v --import-mode=importlib
+git diff --check
+```
+
+两个 help 命令应退出 `0` 且仅显示静态帮助；真正执行链的证据由 P4E 合成测试提供。分别记录专项、重点组、完整回归的实际结果与子测试数，不以历史计数替代当前运行。现有 Validator CLI 的 `PASS / NEEDS_REVIEW / REJECT / ERROR` 与 Runtime 的 `SUCCESS / PROTOCOL_ERROR / LOCAL_EXECUTION_FAILURE / Host error` 不可互换。
+
+范围、安全限制、输出保存边界及已知空文件限制见 [Local Read-Only Context Runtime](../docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md)。测试通过不产生自动注册、授权、激活或 GitHub 发布权限。
