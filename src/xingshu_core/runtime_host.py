@@ -19,10 +19,12 @@ from .context_runtime import resolve_registered_context
 from .local_filesystem_adapter import LocalFilesystemSourceAdapter
 from .runtime_contracts import (
     RuntimeContext, RuntimeExecutionResult, RuntimeFailureCategory, RuntimeLocalFailure,
-    RuntimeResultKind, TrustedClock,
+    RuntimeResultKind, SourceAdapter, TrustedClock,
 )
 
-__all__ = ["LocalRuntimeHostConfig", "HostInputError", "resolve_local"]
+__all__ = ["LocalRuntimeHostConfig", "HostInputError", "resolve_local", "SourceAdapterComposer"]
+
+SourceAdapterComposer = Callable[[SourceAdapter], SourceAdapter]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -90,11 +92,18 @@ def _observation_id() -> str:
     return "p4e-localfs-" + uuid4().hex
 
 
-def resolve_local(config: LocalRuntimeHostConfig, *, clock: TrustedClock | None = None,
-                  observation_id_factory: Callable[[], str] | None = None) -> RuntimeExecutionResult:
+def resolve_local(
+    config: LocalRuntimeHostConfig,
+    *,
+    clock: TrustedClock | None = None,
+    observation_id_factory: Callable[[], str] | None = None,
+    adapter_composer: SourceAdapterComposer | None = None,
+) -> RuntimeExecutionResult:
     """显式加载四个文件，构建真实适配器/上下文，并且只调用一次 Runtime。
 
-clock 与 observation_id_factory 仅供可信宿主注入；CLI 不提供覆盖参数。
+clock、observation_id_factory 与 adapter_composer 仅供可信宿主注入；CLI
+不提供覆盖参数。composer 在 LocalFS 构造后、Context 构造前只调用一次；
+默认 None 保留原适配器。组合失败不回退，不重新加载输入。
 加载/构造失败抛固定 HostInputError；Runtime 异常保持本地执行不可用语义。
 """
     try:
@@ -111,6 +120,12 @@ clock 与 observation_id_factory 仅供可信宿主注入；CLI 不提供覆盖�
             scope_id=config.scope_id, clock=trusted_clock, observation_id_factory=id_factory,
             hard_max_bytes=config.hard_max_bytes,
         )
+        if adapter_composer is not None:
+            if not callable(adapter_composer):
+                raise HostInputError()
+            adapter = adapter_composer(adapter)
+            if not isinstance(adapter, SourceAdapter):
+                raise HostInputError()
         context = RuntimeContext(
             reference=reference, reference_bytes=reference_bytes,
             client_profile=profile, client_profile_bytes=profile_bytes,

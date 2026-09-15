@@ -131,3 +131,30 @@ git diff --check
 两个 help 命令应退出 `0` 且仅显示静态帮助；真正执行链的证据由 P4E 合成测试提供。分别记录专项、重点组、完整回归的实际结果与子测试数，不以历史计数替代当前运行。现有 Validator CLI 的 `PASS / NEEDS_REVIEW / REJECT / ERROR` 与 Runtime 的 `SUCCESS / PROTOCOL_ERROR / LOCAL_EXECUTION_FAILURE / Host error` 不可互换。
 
 范围、安全限制、输出保存边界及已知空文件限制见 [Local Read-Only Context Runtime](../docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md)。测试通过不产生自动注册、授权、激活或 GitHub 发布权限。
+
+## P5 Obsidian Context Bridge（Obsidian 上下文桥接候选）
+
+P5 复用 P4，不创建第二套文件系统读取器。`resolve_obsidian()` 是独立 Python library entry（库入口），固定安装笔记准入包装器；P4 generic Local Runtime（通用本地运行时）及 `runtime_cli resolve-local` 继续独立，不自动成为 Obsidian 模式。
+
+| 阶段 | 文档或测试入口（测试路径相对 `tests/`） | 证据范围 |
+|---|---|---|
+| P5A Scope（范围合同） | [Obsidian Bridge 规格](../docs/OBSIDIAN_CONTEXT_BRIDGE.md) | root / locator / entry 所有权、固定组合接口与 v0.1 边界；不是 executable test（可执行测试） |
+| P5B Composition（组合实现） | `runtime/test_obsidian_bridge.py`、`runtime/test_runtime_host.py` | composer 一次调用、单次权限加载、原始字节、默认 P4 路线、点号路径准入、安全失败及最小真实链 |
+| P5C Synthetic Vault E2E（合成知识库端到端） | `runtime/test_obsidian_bridge_localfs_integration.py` | 真实临时 Vault、P2D/P2C/P2D/P2E、精确字节、邻居零探测、隐藏与媒体拒绝、路径安全、更新/改名/旧路径复用、生命周期、隐私、无扫描与无写回 |
+| P5D Packaging（候选包装） | `conformance/v0.3/test_candidate_manifest.py`、`compatibility/v0.2-v0.3/test_non_interference.py` | 独立候选 capability、默认关闭、无效力、引用有效、既有能力保持；旧 Consumer（使用方）未请求时忽略、显式请求时拒绝 |
+
+`support/obsidian_bridge_fixtures.py` 仅为测试构造与真实调用证据包装，不登记为可执行测试。所有 Vault 内容在 `tmp_path` 下合成；没有读取用户真实 Obsidian。Synthetic real-I/O（合成来源真实输入输出）不等于 Real User Vault Adoption（真实用户知识库采用），也不等于 Production Verification（生产验证）。
+
+```bash
+PYTHONPATH=src python -m pytest \
+  tests/runtime/test_obsidian_bridge.py \
+  tests/runtime/test_obsidian_bridge_localfs_integration.py \
+  tests/runtime/test_runtime_host.py \
+  tests/runtime/test_context_runtime.py \
+  tests/runtime/test_context_runtime_localfs_integration.py \
+  tests/conformance/v0.3/test_candidate_manifest.py \
+  tests/compatibility/v0.2-v0.3/test_non_interference.py \
+  -v --import-mode=importlib
+```
+
+完整回归继续使用 `python -m pytest tests/ -v --import-mode=importlib`。按本轮实际结果记录计数；测试和能力登记不授权发布、激活或私人实例采用。
