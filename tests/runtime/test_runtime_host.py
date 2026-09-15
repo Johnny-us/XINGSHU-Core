@@ -175,3 +175,120 @@ def test_host_loader_does_not_repair_unknown_fields(tmp_path, monkeypatch):
     assert trace["contexts"][0].reference["unknown_private"] == AUTH_PRIVATE
     assert result.kind is RuntimeResultKind.LOCAL_EXECUTION_FAILURE
     assert not trace["reads"]
+
+
+@pytest.mark.parametrize("compose", [False, True])
+def test_composition_preserves_single_load_exact_bytes_and_runtime_call(tmp_path, monkeypatch, compose):
+    case = make_case(tmp_path)
+    trace = instrument(monkeypatch)
+    calls, opened_files = [], []
+    original_open = builtins.open
+
+    class ForwardingAdapter:
+        def __init__(self, delegate):
+            self.delegate = delegate
+
+        def manifest(self):
+            return self.delegate.manifest()
+
+        def execute(self, request):
+            return self.delegate.execute(request)
+
+    def composer(delegate):
+        assert type(delegate) is LocalFilesystemSourceAdapter
+        assert len(trace["loads"]) == 4 and not trace["contexts"]
+        wrapper = ForwardingAdapter(delegate)
+        calls.append((delegate, wrapper))
+        return wrapper
+
+    def opened(path, mode="r", *args, **kwargs):
+        if path in case["files"].values():
+            assert mode == "rb"
+            opened_files.append(path)
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "open", opened)
+    result = host.resolve_local(case["config"], adapter_composer=composer if compose else None)
+    assert result.kind is RuntimeResultKind.SUCCESS
+    assert opened_files == list(case["files"].values())
+    assert len(trace["loads"]) == 4
+    assert len(trace["contexts"]) == len(trace["outcomes"]) == 1
+    ctx = trace["contexts"][0]
+    if compose:
+        assert len(calls) == 1 and ctx.adapter is calls[0][1]
+    else:
+        assert calls == [] and type(ctx.adapter) is LocalFilesystemSourceAdapter
+    for i, (name, attr) in enumerate((("reference", "reference_bytes"), ("profile", "client_profile_bytes"), ("binding", "runtime_binding_bytes"))):
+        assert getattr(ctx, attr) is trace["loads"][i][1]
+        assert getattr(ctx, attr) == case["blobs"][name]
+    assert trace["reads"] == [RAW]
+    assert [r.decision for r in trace["authority"]] == [Decision.PASS] * 2
+    assert trace["resolve"][0][1] is result.validation
+
+
+@pytest.mark.parametrize("fault", ["not_callable", "raises", "none", "object", "noncallable_methods"])
+def test_composer_failure_is_private_host_error_without_fallback(tmp_path, monkeypatch, fault):
+    case = make_case(tmp_path)
+    trace = instrument(monkeypatch)
+    calls = []
+
+    def composer(delegate):
+        calls.append(delegate)
+        if fault == "raises":
+            raise RuntimeError(str(case["root"]) + BODY_PRIVATE)
+        if fault == "none":
+            return None
+        if fault == "noncallable_methods":
+            return type("InvalidAdapter", (), {"manifest": 1, "execute": 2})()
+        return object()
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Composition failure must not enter Runtime or execute LocalFS")
+
+    monkeypatch.setattr(host, "resolve_registered_context", forbidden)
+    monkeypatch.setattr(LocalFilesystemSourceAdapter, "execute", forbidden)
+    with pytest.raises(host.HostInputError) as caught:
+        host.resolve_local(case["config"], adapter_composer=42 if fault == "not_callable" else composer)
+    assert len(calls) == (0 if fault == "not_callable" else 1)
+    assert len(trace["loads"]) == 4 and not trace["reads"]
+    assert str(caught.value) == "Runtime host input could not be accepted."
+    assert caught.value.__context__ is None and caught.value.__cause__ is None
+    assert_private(repr(caught.value), case)
+
+
+@pytest.mark.parametrize("name", ["reference", "profile", "binding", "request"])
+def test_json_cannot_select_composer(tmp_path, monkeypatch, name):
+    case = make_case(tmp_path)
+    case["records"][name]["adapter_composer"] = "synthetic-policy-override"
+    case["files"][name].write_bytes(format_json(case["records"][name]))
+    trace = instrument(monkeypatch)
+    result = host.resolve_local(case["config"])
+    assert result.kind is RuntimeResultKind.LOCAL_EXECUTION_FAILURE
+    assert type(trace["contexts"][0].adapter) is LocalFilesystemSourceAdapter
+    assert not trace["reads"]
+    assert "adapter_composer" not in {f.name for f in dataclasses.fields(host.LocalRuntimeHostConfig)}
+    with pytest.raises(TypeError):
+        dataclasses.replace(case["config"], adapter_composer=lambda value: value)
+
+
+def test_existing_cli_has_no_composer_selection(tmp_path, monkeypatch, capsys):
+    from xingshu_core import runtime_cli as cli
+
+    case = make_case(tmp_path)
+    trace = instrument(monkeypatch)
+    original = host.resolve_local
+    calls = []
+
+    def resolved(config, **kwargs):
+        calls.append(kwargs)
+        assert "adapter_composer" not in kwargs
+        return original(config, **kwargs)
+
+    monkeypatch.setattr(cli, "resolve_local", resolved)
+    assert cli.main(case["args"]) == 0
+    assert calls == [{}]
+    assert type(trace["contexts"][0].adapter) is LocalFilesystemSourceAdapter
+    capsys.readouterr()
+    assert cli.main(case["args"] + ["--adapter-composer", "synthetic-override"]) == 4
+    assert calls == [{}]
+    assert "synthetic-override" not in capsys.readouterr().err
