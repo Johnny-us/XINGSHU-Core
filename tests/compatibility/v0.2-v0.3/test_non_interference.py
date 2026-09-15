@@ -21,8 +21,9 @@ V03_CAPABILITIES = {
 V04_CAPABILITY = "runnable_validation_cli"
 CONTEXT_BRIDGE_CAPABILITY = "context_bridge_validation"
 LOCAL_RUNTIME_CAPABILITY = "local_read_only_context_runtime"
+OBSIDIAN_CAPABILITY = "obsidian_context_bridge"
 DISABLED_UNSUPPORTED_CAPABILITIES = V03_CAPABILITIES | {
-    V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY, LOCAL_RUNTIME_CAPABILITY,
+    V04_CAPABILITY, CONTEXT_BRIDGE_CAPABILITY, LOCAL_RUNTIME_CAPABILITY, OBSIDIAN_CAPABILITY,
 }
 SUPPORTED_CAPABILITY_VERSIONS = {
     "state_separation": "0.2.1",
@@ -295,6 +296,23 @@ class LocalRuntimeLimitedConsumerTests(unittest.TestCase):
         self.assertFalse(ignored["automatic_migration"])
         self.assertEqual({"mode": "blocked", "error_code": "unsupported_capability"},
                          consumer.evaluate_manifest(MANIFEST, requested_capability=LOCAL_RUNTIME_CAPABILITY))
+        self.assertEqual(before, MANIFEST)
+        self.assertEqual([], consumer.parser_calls)
+
+
+class ObsidianBridgeLimitedConsumerTests(unittest.TestCase):
+    def test_obsidian_is_ignored_unrequested_and_rejected_when_requested(self):
+        before = copy.deepcopy(MANIFEST)
+        consumer = MinimalLimitedConsumer()
+        self.assertNotIn(OBSIDIAN_CAPABILITY, SUPPORTED_CAPABILITY_VERSIONS)
+        self.assertIs(False, MANIFEST["capabilities"][OBSIDIAN_CAPABILITY]["enabled_by_default"])
+        ignored = consumer.evaluate_manifest(MANIFEST)
+        self.assertEqual("continue_v0.2_v0.2.1", ignored["mode"])
+        self.assertIn(OBSIDIAN_CAPABILITY, ignored["ignored_capabilities"])
+        for field in ("automatic_activation", "automatic_adoption", "automatic_migration"):
+            self.assertFalse(ignored[field])
+        self.assertEqual({"mode": "blocked", "error_code": "unsupported_capability"},
+                         consumer.evaluate_manifest(MANIFEST, requested_capability=OBSIDIAN_CAPABILITY))
         self.assertEqual(before, MANIFEST)
         self.assertEqual([], consumer.parser_calls)
 

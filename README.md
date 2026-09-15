@@ -63,6 +63,7 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [v0.4 Change Notes](docs/V0_4_CHANGE_NOTES.md) | v0.4 只读运行时验证候选范围与兼容边界 |
 | [Validator CLI](docs/CLI.md) | v0.4 只读验证器安装、命令、决定与退出码 |
 | [Local Read-Only Context Runtime](docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md) | 本地只读上下文运行时 v0.1 候选；默认关闭、独立入口、所有者控制的宿主边界 |
+| [Obsidian Context Bridge](docs/OBSIDIAN_CONTEXT_BRIDGE.md) | 本地只读 Obsidian 桥接 v0.1 候选；独立库入口、合成 Vault 验证、未采用真实用户 Vault |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |

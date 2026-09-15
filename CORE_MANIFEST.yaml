@@ -218,3 +218,27 @@ capabilities:
     authorization_effect: none
     activation_effect: none
     rollback_behavior: disable_capability_and_stop_invoking_local_runtime_host
+  obsidian_context_bridge:
+    version: "0.1"
+    status: candidate
+    enabled_by_default: false
+    spec_ref: docs/OBSIDIAN_CONTEXT_BRIDGE.md
+    schema_refs:
+      - schemas/candidate/context-bridge/registered-context-reference.schema.json
+      - schemas/candidate/context-bridge/trusted-client-profile.schema.json
+      - schemas/candidate/context-bridge/runtime-binding.schema.json
+      - schemas/candidate/context-bridge/source-adapter-contract.schema.json
+      - schemas/candidate/context-bridge/resolve-context.schema.json
+    test_refs:
+      - tests/runtime/test_obsidian_bridge.py
+      - tests/runtime/test_obsidian_bridge_localfs_integration.py
+      - tests/runtime/test_runtime_host.py
+      - tests/conformance/v0.3/test_candidate_manifest.py
+      - tests/compatibility/v0.2-v0.3/test_non_interference.py
+    dependencies:
+      local_read_only_context_runtime: ">=0.1"
+    backward_compatibility: additive_optional
+    governance_effect: none
+    authorization_effect: none
+    activation_effect: none
+    rollback_behavior: disable_capability_and_stop_invoking_obsidian_bridge

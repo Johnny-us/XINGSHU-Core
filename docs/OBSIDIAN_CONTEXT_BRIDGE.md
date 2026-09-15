@@ -5,8 +5,9 @@ scope: public-core
 status: candidate
 version: "0.1"
 updated: 2026-09-15
-phase: P5A
-implementation_state: not_implemented
+phase: P5D
+implementation_state: candidate_implemented
+validation_scope: synthetic_vault_real_io
 enabled_by_default: false
 activation_state: not_active
 governance_effect: none
@@ -19,9 +20,9 @@ visibility: public
 
 ## 1. Purpose（目的）与冻结基线
 
-本规格冻结 Obsidian Vault（知识库目录）作为 XINGSHU Source（来源）的最小接入范围与未来组合接口。目标是 `Obsidian → XINGSHU`，保留用户控制的原始文件，不复制整个 Vault，不建立第二数据库。
+本规格冻结 Obsidian Vault（知识库目录）作为 XINGSHU Source（来源）的最小接入范围与组合接口。目标是 `Obsidian → XINGSHU`，保留用户控制的原始文件，不复制整个 Vault，不建立第二数据库。
 
-本文件是 P5A 设计冻结候选，不是行为实现、集成验收、能力启用或私人实例采用证据。P5B 实现及 P5C 合成集成验证须分别获授权；本阶段不修改运行代码、Schema（结构合同）、Manifest（能力清单）或 CLI（命令行接口）。
+本文件保留 P5A 冻结规范，并记录已完成的 P5B 候选实现与 P5C 合成集成证据。当前为 P5D 本地候选包装；不改变执行语义、Schema（结构合同）或 CLI（命令行接口），不产生能力启用或私人实例采用效力。Manifest（能力清单）登记见第 18 节。
 
 | 基线 | 值 |
 |---|---|
@@ -144,9 +145,9 @@ v0.1 授权的是 exact path entry（精确路径入口），不是长期 inode 
 | 注入任意原始 adapter factory，接管根目录和来源构造 | 不选：暴露过多配置和构造责任，允许脱离既有 LocalFS |
 | 在 Host 构造好 LocalFS 后注入可信 adapter composer | **唯一推荐**：保留一次加载与默认行为，P5 只包装实际执行适配器 |
 
-## 11. Selected future API（选定的未来接口，尚未实现）
+## 11. Selected API（已实现的冻结组合接口）
 
-P5B 需要在 `runtime_host.py` 做 additive extension（增量扩展）。精确未来签名为：
+P5B 已在 `runtime_host.py` 完成 additive extension（增量扩展）。冻结签名为：
 
 ```python
 SourceAdapterComposer = Callable[[SourceAdapter], SourceAdapter]
@@ -161,7 +162,7 @@ def resolve_local(
     ...
 ```
 
-`Callable` 来自 `collections.abc`；`SourceAdapter`、`TrustedClock` 与 `RuntimeExecutionResult` 复用 `runtime_contracts` 的公开类型。`SourceAdapterComposer` 为 `runtime_host` 的公开类型别名；不修改冻结的 `SourceAdapter` Protocol（接口约定）。上述省略号只表示规格，P5A 不添加可执行代码。
+`Callable` 来自 `collections.abc`；`SourceAdapter`、`TrustedClock` 与 `RuntimeExecutionResult` 复用 `runtime_contracts` 的公开类型。`SourceAdapterComposer` 为 `runtime_host` 的公开类型别名；不修改冻结的 `SourceAdapter` Protocol（接口约定）。上述省略号只省略实现正文；P5A 冻结的签名已由 P5B 实现。
 
 组合点与所有权必须满足：
 
@@ -175,7 +176,7 @@ def resolve_local(
 
 这是可信 Python 代码组合接口，不是插件沙箱。`SourceAdapter` 形状检查不能认证实现；具有任意同进程代码执行能力的 Owner 控制面本就可以改变执行方式，不能声称 hook 隔离恶意 Host。
 
-P5 唯一公开执行入口拟冻结为：
+P5 已实现的唯一公开执行入口为：
 
 ```python
 def resolve_obsidian(
@@ -215,24 +216,24 @@ P5 policy 检查的是 Runtime 在 P2D 通过后从本次输入快照选出的�
 
 **NO NEW JSON SCHEMA。** Reference、Profile、Binding、Source Adapter 和 Resolve 已表达现有协议；root 与 composer 仅属于 Host 进程内配置，没有新持久化/跨进程对象。若后续发现确需新增协议对象，须停止扩展并另行评审。
 
-后续 packaging（能力包装）可独立登记 `obsidian_context_bridge`，依赖 `local_read_only_context_runtime >= 0.1`，保持 `additive_optional`、`candidate`、`enabled_by_default: false`、`activation_state: not_active` 和三个 effect 为 `none`。P5A 不修改 Manifest，不把 P4 改名为 Obsidian Runtime。
+P5D packaging（能力包装）独立登记 `obsidian_context_bridge`，依赖 `local_read_only_context_runtime >= 0.1`，保持 `additive_optional`、`candidate`、`enabled_by_default: false`、`activation_state: not_active` 和三个 effect 为 `none`。P5A 的范围冻结未修改 Manifest；P5D 的独立登记不把 P4 改名为 Obsidian Runtime。
 
 旧 `resolve_local(config, clock=..., observation_id_factory=...)` 调用不变。原 `LocalRuntimeHostConfig` 字段不变；通用 Runtime、LocalFS、验证器、Schema、现有 `xingshu doctor` / `xingshu validate` 和独立 P4 CLI 不依赖 Obsidian，也不暴露新开关。
 
 默认关闭是候选采用状态，不宣称存在尚未实现的强制激活开关。P5 不自动激活 P4 依赖。
 
-## 14. P5B production scope（后续生产代码范围）
+## 14. P5B production scope（已实现生产代码范围）
 
 P5B 最小生产代码仅涉及：
 
 - `src/xingshu_core/runtime_host.py`：第 11 节公开类型别名、可选组合参数、单次组合点及既有安全宿主错误处理。
 - `src/xingshu_core/obsidian_bridge.py`：固定组合入口、内部准入 wrapper 与固定私有拒绝异常。
 
-不创建新的 reader、parser、hash helper、authority loader、Context builder、CLI 或插件。P5B 的单元测试与精确可写清单须在其执行授权中列明；本规格不直接授予实现权限。
+不创建新的 reader、parser、hash helper、authority loader、Context builder、CLI 或插件。P5B 已按独立授权完成单元测试和最小真实链；本规格不授予额外实现权限。
 
 ## 15. P5C synthetic E2E matrix（合成端到端验收矩阵）
 
-未来测试使用 `tmp_path` 合成 Reference/Profile/Binding/Request、Vault 及邻居哨兵。不得接触真实 Vault。证据包装必须调用原实现，不能 mock 成功结果、LocalFS 读取或 P2D/P2C/P2E。
+P5C 测试使用 `tmp_path` 合成 Reference/Profile/Binding/Request、Vault 及邻居哨兵。不得接触真实 Vault。证据包装必须调用原实现，不能 mock 成功结果、LocalFS 读取或 P2D/P2C/P2E。
 
 | 场景 | 必须验证 |
 |---|---|
@@ -255,7 +256,7 @@ P5B 最小生产代码仅涉及：
 | P4 非 Obsidian 兼容 | 不传 composer 时普通本地 Markdown 与已授权隐藏 Markdown 保留既有行为 |
 | 输入稳定与隐私 | 不修改请求、权限对象/字节、文件；异常、repr、失败结果无路径/正文/权限 bytes |
 
-建议后续测试位置为 `tests/runtime/test_obsidian_bridge.py`、`tests/runtime/test_obsidian_bridge_localfs_integration.py`、`tests/support/obsidian_bridge_fixtures.py`，并对现有 `tests/runtime/test_runtime_host.py` 增补默认路线与组合点验证。完整既有回归属于实现后的门禁；P5A 不创建测试或虚构通过记录。
+已实现测试位于 `tests/runtime/test_obsidian_bridge.py`、`tests/runtime/test_obsidian_bridge_localfs_integration.py`，合成支持为 `tests/support/obsidian_bridge_fixtures.py`；现有 `tests/runtime/test_runtime_host.py` 已增补默认路线与组合点验证。第 15 节继续作为验收要求，实际证据见第 18 节；完整回归仍须按每轮实际代码运行。
 
 ## 16. Public / Personal 与安全隐私限制
 
@@ -273,4 +274,26 @@ P4 在返回前重验完整路径以降低 rename/replacement/hardlink 竞态，
 
 元数据解析、插件交互、索引、搜索、改名辅助或 link expansion 必须另立阶段或 capability，不是 v0.1 的隐藏能力。未来每个展开 target 必须独立授权，并冻结深度、文件数、总字节数与循环检测；不得将 read 静默扩展成全 Vault 扫描。
 
-本规格完成后只可提交独立复核。P5A 不创建 P5B 代码，不修改 Manifest，不执行 push、PR、merge、tag、release、Runtime Activation 或私人实例采用。
+P5D 本地包装完成后须提交独立复核。通过后，下一步是另行授权的 GitHub Publication Micro-Batch（发布微批次）；本阶段不执行 push、PR、merge、tag、release、Runtime Activation 或私人实例采用。
+
+## 18. Candidate implementation / evidence / publication（候选实现、证据与发布边界）
+
+当前准确状态为 **Obsidian-aware Candidate execution entry implemented（识别 Obsidian 准入规则的候选执行入口已实现）**、**Synthetic Obsidian Vault real-I/O validated（合成 Obsidian 知识库真实输入输出已验证）**。这是 Local read-only Obsidian Bridge Candidate（本地只读桥接候选），不是真实用户 Vault 接入完成或生产就绪声明。
+
+已实现独立 `resolve_obsidian()` 库入口、所有者显式 Vault root、精确授权 Markdown 笔记、P4 Host composer、P5 点号路径/小写 `.md` 准入，以及原样 LocalFS 委托。读取前 P2D、P2C、读取后 P2D、P2E 全链保留，权限文件和 Source 原始字节不重新序列化或重建。没有第二套文件读取器。
+
+| 阶段 | 冻结证据 | 验证范围 |
+|---|---|---|
+| P5A | `94e655583212ae1ea2fb8d4509d8fba60282bc3a` | 第 1–17 节范围与组合合同 |
+| P5B | `aed7e415f12bcb8c389b559a5eb25e715d70f725` | 最小组合实现；专项 106、聚焦 473、完整 788 项测试及 949 子测试通过 |
+| P5C | `83b08133e9e8f9eb84c0e001e9a3af68ee38cb04` | 合成 Vault 真实链；专项 50、聚焦 501、完整 816 项测试及 949 子测试通过 |
+
+以上计数是对应冻结阶段的历史证据，不代替当前发布前回归。P5C 证明原始字节、单次加载、wikilink/embed 邻居零读取和零探测、无目录扫描、无写回/缓存/索引、生命周期门禁及错误语义。所有 Public Core Vault 测试只使用 synthetic `tmp_path`；没有读取用户真实 Obsidian。真实接入属于独立的 Personal Instance Adoption，须后续单独授权。
+
+明确未实现或不提供：真实用户 Vault 采用；自动 Vault/笔记发现、目录授权、Vault 搜索、全库索引、语义搜索、embeddings、摘要；metadata/YAML/frontmatter 语义解析、别名解析、wikilink/embed 展开；附件、Canvas、Obsidian 插件、watcher/daemon（监视器/后台服务）、写回；OS 调用者认证、恶意同用户/同进程隔离、原子文件系统快照、磁盘撤销记录即时重载；ChatGPT、Claude、DeepSeek 集成、MCP、HTTP/API gateway；生产就绪保证。
+
+`resolve_obsidian()` 仅为 Python library entry。现有 `python -m xingshu_core.runtime_cli resolve-local` 仍是 P4 通用 Local Runtime CLI，不使用 P5 composer，不自动进入 Obsidian 模式；没有新增 `--obsidian`、`--vault` 或 `--allow-hidden` 参数。
+
+Manifest 新增独立 `obsidian_context_bridge`，保持 v0.1、candidate、默认关闭、无治理/授权/激活效力，依赖 `local_read_only_context_runtime >= 0.1`。`schema_refs` 复用实际参与运行的 Reference、Profile、Binding、Source Adapter、Resolve 五份既有合同，不存在新的 Obsidian Schema。`test_refs` 只登记真实可执行测试，不包含支持夹具。既有 `context_bridge_validation` 与 `local_read_only_context_runtime` 元数据不变；依赖不自动激活任何能力。
+
+本地提交、文档更新、测试通过或 Manifest 登记不构成 GitHub 发布授权。本阶段停止于独立复核；后续 push/PR、merge、tag、release、Runtime Activation 和真实 Vault 采用分别受其授权边界约束。

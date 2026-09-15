@@ -195,5 +195,81 @@ class LocalRuntimeCandidateMetadataTests(unittest.TestCase):
                     self.assertRegex(line.lower(), r"不|未|无|\bnot\b|\bno\b", name)
 
 
+class ObsidianBridgeCandidateMetadataTests(unittest.TestCase):
+    SCHEMAS = [
+        "schemas/candidate/context-bridge/registered-context-reference.schema.json",
+        "schemas/candidate/context-bridge/trusted-client-profile.schema.json",
+        "schemas/candidate/context-bridge/runtime-binding.schema.json",
+        "schemas/candidate/context-bridge/source-adapter-contract.schema.json",
+        "schemas/candidate/context-bridge/resolve-context.schema.json",
+    ]
+    TESTS = [
+        "tests/runtime/test_obsidian_bridge.py",
+        "tests/runtime/test_obsidian_bridge_localfs_integration.py",
+        "tests/runtime/test_runtime_host.py",
+        "tests/conformance/v0.3/test_candidate_manifest.py",
+        "tests/compatibility/v0.2-v0.3/test_non_interference.py",
+    ]
+
+    def test_obsidian_has_exact_separate_candidate_metadata_and_existing_refs(self):
+        item = MANIFEST["capabilities"]["obsidian_context_bridge"]
+        self.assertEqual({
+            "version": "0.1", "status": "candidate", "enabled_by_default": False,
+            "spec_ref": "docs/OBSIDIAN_CONTEXT_BRIDGE.md",
+            "schema_refs": self.SCHEMAS, "test_refs": self.TESTS,
+            "dependencies": {"local_read_only_context_runtime": ">=0.1"},
+            "backward_compatibility": "additive_optional",
+            "governance_effect": "none", "authorization_effect": "none", "activation_effect": "none",
+            "rollback_behavior": "disable_capability_and_stop_invoking_obsidian_bridge",
+        }, item)
+        self.assertIs(False, item["enabled_by_default"])
+        self.assertEqual("candidate", MANIFEST["release_stage"])
+        self.assertEqual("not_active", MANIFEST["activation_state"])
+        for ref in [item["spec_ref"], *self.SCHEMAS, *self.TESTS]:
+            self.assertTrue((ROOT / ref).is_file(), ref)
+        self.assertTrue(set(self.SCHEMAS) <= set(CONTEXT_BRIDGE_SCHEMA_REFS))
+        for ref in self.TESTS:
+            self.assertTrue(Path(ref).name.startswith("test_"))
+            self.assertTrue({"support", "fixtures"}.isdisjoint(Path(ref).parts))
+
+    def test_p4_runtime_metadata_remains_exact_and_independent(self):
+        self.assertEqual({
+            "version": "0.1", "status": "candidate", "enabled_by_default": False,
+            "spec_ref": "docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md",
+            "schema_refs": self.SCHEMAS,
+            "test_refs": [
+                "tests/conformance/context-runtime/test_runtime_contract.py",
+                "tests/runtime/test_local_filesystem_adapter.py",
+                "tests/runtime/test_filesystem_security.py",
+                "tests/runtime/test_context_runtime.py",
+                "tests/runtime/test_context_runtime_localfs_integration.py",
+                "tests/runtime/test_runtime_host.py", "tests/runtime/test_runtime_cli.py",
+                "tests/conformance/v0.3/test_candidate_manifest.py",
+                "tests/compatibility/v0.2-v0.3/test_non_interference.py",
+            ],
+            "dependencies": {"context_bridge_validation": ">=0.1"},
+            "backward_compatibility": "additive_optional",
+            "governance_effect": "none", "authorization_effect": "none", "activation_effect": "none",
+            "rollback_behavior": "disable_capability_and_stop_invoking_local_runtime_host",
+        }, MANIFEST["capabilities"]["local_read_only_context_runtime"])
+
+    def test_obsidian_docs_report_candidate_implementation_without_activation(self):
+        doc = (ROOT / "docs/OBSIDIAN_CONTEXT_BRIDGE.md").read_text()
+        metadata = yaml.safe_load(doc.split("---", 2)[1])
+        self.assertEqual("candidate", metadata["status"])
+        self.assertEqual("candidate_implemented", metadata["implementation_state"])
+        self.assertEqual("synthetic_vault_real_io", metadata["validation_scope"])
+        self.assertIs(False, metadata["enabled_by_default"])
+        self.assertEqual("not_active", metadata["activation_state"])
+        for field in ("governance_effect", "authorization_effect", "activation_effect"):
+            self.assertEqual("none", metadata[field])
+        self.assertIn("resolve_obsidian()", doc)
+        self.assertIn("python -m xingshu_core.runtime_cli resolve-local", doc)
+        self.assertIn("Personal Instance Adoption", doc)
+        registry = (ROOT / "tests/README.md").read_text()
+        for ref in self.TESTS:
+            self.assertIn(str(Path(ref).relative_to("tests")), registry)
+
+
 if __name__ == "__main__":
     unittest.main()
