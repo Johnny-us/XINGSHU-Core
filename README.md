@@ -37,6 +37,30 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 
 所有 v0.2、v0.3 与 v0.4 能力仍为 `candidate`、默认关闭，`governance_effect: none`、`activation_state: not_active`。文件存在、测试通过、Commit、Pull Request、Tag 或 Release 都不会自动使其生效，也不会使任何 Personal Instance（私人实例）自动采用。v0.1 语义与恢复基线保持不变。
 
+## Personal Instance Validation Status（私人实例验证状态）
+
+公开状态同步日期：2026-10-01。验证里程碑：`M3C-B2 Retry = PASS`。
+
+一个独立维护的私人 Personal Instance 已基于现有 Public Core / P5 Contracts（契约），完成 Desktop Codex（桌面 AI 客户端）经本地 MCP（模型上下文协议）桥接恢复真实长期上下文的有边界验证。已观察到确定性元数据路由、精确条目解析、显式一次性授权、固定内容验证、一次最终披露、消费与撤销、后续访问拒绝，以及多 MCP 实例交接。
+
+```mermaid
+flowchart TD
+    U[用户任务意图] --> A[Desktop AI 客户端]
+    A --> B[本地 MCP / 客户端桥]
+    B --> R[私人上下文注册表：仅路由元数据]
+    R --> P[显式、有时限的一次性授权]
+    P --> C[现有 XINGSHU Core / P5 精确条目契约与运行时]
+    C --> K[获授权的个人知识来源]
+    K --> D[返回一次上下文]
+    D --> X[消费授权、撤销、后续访问拒绝]
+```
+
+Registry（注册表）只帮助定位来源，不存放正文，不产生权限。私人客户端桥、注册表与一次性权限控制由该实例独立维护，**不属于 Public Core 随附的完整 Daily Context（日用上下文）产品**。公共仓库测试继续使用合成、非私人夹具；本次只同步公开说明，不变更核心合同、代码、版本或默认关闭状态。
+
+`production_ready=false`。ChatGPT Web shared-context path（网页端共享上下文路径）、Multi-Source runtime（多来源运行）、跨设备验收、持续／后台运行、长期免确认访问、OpenWiki 集成和 P6 均未完成。单次真实验收不建立持续访问权限或通用部署保证。
+
+验证范围与实现分工见 [Personal Instance Daily Context Validation（私人实例日用上下文验证说明）](docs/PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md)。
+
 ## Quick Start（快速开始）
 
 1. 阅读 [Getting Started（开始使用）](docs/GETTING_STARTED.md)；
@@ -63,7 +87,8 @@ XINGSHU 致力于建立一套以用户主权、最小权限、隐私保护、可
 | [v0.4 Change Notes](docs/V0_4_CHANGE_NOTES.md) | v0.4 只读运行时验证候选范围与兼容边界 |
 | [Validator CLI](docs/CLI.md) | v0.4 只读验证器安装、命令、决定与退出码 |
 | [Local Read-Only Context Runtime](docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md) | 本地只读上下文运行时 v0.1 候选；默认关闭、独立入口、所有者控制的宿主边界 |
-| [Obsidian Context Bridge](docs/OBSIDIAN_CONTEXT_BRIDGE.md) | 本地只读 Obsidian 桥接 v0.1 候选；独立库入口、合成 Vault 验证、未采用真实用户 Vault |
+| [Obsidian Context Bridge](docs/OBSIDIAN_CONTEXT_BRIDGE.md) | 本地只读 Obsidian 桥接 v0.1 候选；公共测试使用合成 Vault，私人实例真实验证单独说明 |
+| [Personal Instance Daily Context Validation](docs/PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md) | 非规范性验证里程碑；私人实例已完成有边界真实验证，公共核心未打包日用上下文产品 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
