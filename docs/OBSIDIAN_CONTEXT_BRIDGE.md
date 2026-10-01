@@ -280,6 +280,8 @@ P5D 本地包装完成后须提交独立复核。通过后，下一步是另行�
 
 当前准确状态为 **Obsidian-aware Candidate execution entry implemented（识别 Obsidian 准入规则的候选执行入口已实现）**、**Synthetic Obsidian Vault real-I/O validated（合成 Obsidian 知识库真实输入输出已验证）**。这是 Local read-only Obsidian Bridge Candidate（本地只读桥接候选），不是真实用户 Vault 接入完成或生产就绪声明。
 
+以上是公共仓库的候选实现及公共测试范围。另有一个独立维护的私人 Personal Instance（私人实例）基于已采用的现有 Core / P5 契约完成了有边界的真实来源与 Desktop Codex（桌面 AI 客户端）上下文恢复验证，里程碑为 `M3C-B2 Retry = PASS`。公共测试继续使用合成、非私人夹具；该私人验证不意味着本仓库随附完整客户端桥、日用上下文控制面或私人 Vault 部署。`production_ready=false`；详情见[非规范性验证说明](PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md)。
+
 已实现独立 `resolve_obsidian()` 库入口、所有者显式 Vault root、精确授权 Markdown 笔记、P4 Host composer、P5 点号路径/小写 `.md` 准入，以及原样 LocalFS 委托。读取前 P2D、P2C、读取后 P2D、P2E 全链保留，权限文件和 Source 原始字节不重新序列化或重建。没有第二套文件读取器。
 
 | 阶段 | 冻结证据 | 验证范围 |
@@ -288,9 +290,9 @@ P5D 本地包装完成后须提交独立复核。通过后，下一步是另行�
 | P5B | `aed7e415f12bcb8c389b559a5eb25e715d70f725` | 最小组合实现；专项 106、聚焦 473、完整 788 项测试及 949 子测试通过 |
 | P5C | `83b08133e9e8f9eb84c0e001e9a3af68ee38cb04` | 合成 Vault 真实链；专项 50、聚焦 501、完整 816 项测试及 949 子测试通过 |
 
-以上计数是对应冻结阶段的历史证据，不代替当前发布前回归。P5C 证明原始字节、单次加载、wikilink/embed 邻居零读取和零探测、无目录扫描、无写回/缓存/索引、生命周期门禁及错误语义。所有 Public Core Vault 测试只使用 synthetic `tmp_path`；没有读取用户真实 Obsidian。真实接入属于独立的 Personal Instance Adoption，须后续单独授权。
+以上计数是对应冻结阶段的历史证据，不代替当前发布前回归。P5C 证明原始字节、单次加载、wikilink/embed 邻居零读取和零探测、无目录扫描、无写回/缓存/索引、生命周期门禁及错误语义。所有 Public Core Vault 测试只使用 synthetic `tmp_path`；公共测试没有读取用户真实 Obsidian。真实接入属于独立的 Personal Instance Adoption（私人实例采用）与访问授权边界，不由公共测试或文档更新授予；上方私人验证是独立实例中的已完成里程碑。
 
-明确未实现或不提供：真实用户 Vault 采用；自动 Vault/笔记发现、目录授权、Vault 搜索、全库索引、语义搜索、embeddings、摘要；metadata/YAML/frontmatter 语义解析、别名解析、wikilink/embed 展开；附件、Canvas、Obsidian 插件、watcher/daemon（监视器/后台服务）、写回；OS 调用者认证、恶意同用户/同进程隔离、原子文件系统快照、磁盘撤销记录即时重载；ChatGPT、Claude、DeepSeek 集成、MCP、HTTP/API gateway；生产就绪保证。
+Public Core 本身明确未实现或不提供：真实用户 Vault 采用；自动 Vault/笔记发现、目录授权、Vault 搜索、全库索引、语义搜索、embeddings、摘要；metadata/YAML/frontmatter 语义解析、别名解析、wikilink/embed 展开；附件、Canvas、Obsidian 插件、watcher/daemon（监视器/后台服务）、写回；OS 调用者认证、恶意同用户/同进程隔离、原子文件系统快照、磁盘撤销记录即时重载；ChatGPT、Claude、DeepSeek 集成、MCP、HTTP/API gateway；生产就绪保证。私人实例的本地 MCP 验证不把这些能力添加到公共桥接包。
 
 `resolve_obsidian()` 仅为 Python library entry。现有 `python -m xingshu_core.runtime_cli resolve-local` 仍是 P4 通用 Local Runtime CLI，不使用 P5 composer，不自动进入 Obsidian 模式；没有新增 `--obsidian`、`--vault` 或 `--allow-hidden` 参数。
 

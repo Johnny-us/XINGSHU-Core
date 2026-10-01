@@ -119,6 +119,8 @@ LocalFS 使用 `dir_fd`、`O_NOFOLLOW`、`O_DIRECTORY`、目录 device/inode 身
 
 真实执行证据来自临时合成 Markdown 与授权文件，经过原有 P2D/P2C/P2D/P2E；不使用 Fake Adapter（模拟适配器）替代集成主链。覆盖原始字节、同路径内容更新、权限拒绝、限额、失败隐私和无写回。该证据不等于生产环境验证或真实私人 Vault 集成。
 
+上述范围指公共仓库自身的测试与随附实现。另有独立维护的私人 Personal Instance（私人实例）基于现有 Core / P5 契约完成了 Desktop Codex 经本地 MCP（模型上下文协议）的有边界真实来源验证，公开里程碑为 `M3C-B2 Retry = PASS`。该实例自己的客户端桥、元数据注册表、一次性权限消费与撤销、多实例交接实现不随本公共 Runtime 分发，不改变本文件的执行合同。公共测试仍为合成测试，`production_ready=false`。参见[非规范性日用上下文验证说明](PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md)。
+
 在已安装测试依赖的仓库环境中运行：
 
 ```bash
