@@ -89,6 +89,7 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 | [Local Read-Only Context Runtime](docs/LOCAL_READ_ONLY_CONTEXT_RUNTIME.md) | 本地只读上下文运行时 v0.1 候选；默认关闭、独立入口、所有者控制的宿主边界 |
 | [Obsidian Context Bridge](docs/OBSIDIAN_CONTEXT_BRIDGE.md) | 本地只读 Obsidian 桥接 v0.1 候选；公共测试使用合成 Vault，私人实例真实验证单独说明 |
 | [Personal Instance Daily Context Validation](docs/PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md) | 非规范性验证里程碑；私人实例已完成有边界真实验证，公共核心未打包日用上下文产品 |
+| [Context Metadata Lookup](docs/CONTEXT_METADATA_LOOKUP_BOUNDARY.md) | 上下文元数据查找契约候选；查找不产生正文读取权或客户端认证 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
