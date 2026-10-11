@@ -90,6 +90,7 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 | [Obsidian Context Bridge](docs/OBSIDIAN_CONTEXT_BRIDGE.md) | 本地只读 Obsidian 桥接 v0.1 候选；公共测试使用合成 Vault，私人实例真实验证单独说明 |
 | [Personal Instance Daily Context Validation](docs/PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md) | 非规范性验证里程碑；私人实例已完成有边界真实验证，公共核心未打包日用上下文产品 |
 | [Context Metadata Lookup](docs/CONTEXT_METADATA_LOOKUP_BOUNDARY.md) | 上下文元数据查找契约候选；查找不产生正文读取权或客户端认证 |
+| [Project Conversation Continuity](docs/PROJECT_CONVERSATION_CONTINUITY.md) | 非规范性对话接续说明候选；进度保留、身份核验、结果返回及接线与导航分段 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
