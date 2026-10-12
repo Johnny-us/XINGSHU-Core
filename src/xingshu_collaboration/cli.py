@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import tempfile
 
 from . import __version__
 from .binding import CandidateError
@@ -49,13 +50,24 @@ def install_skill(destination):
     if target.name != 'xingshu-collaborate' or target.exists():
         raise CandidateError('NEW_NAMED_SKILL_DIRECTORY_REQUIRED')
     resource = files('xingshu_collaboration') / 'skill'
+    contents = {name: resource.joinpath(name).read_bytes() for name in ('SKILL.md', 'agents/openai.yaml')}
     target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    target.mkdir(mode=0o700)
-    for name in ('SKILL.md', 'agents/openai.yaml'):
-        output = target / name
-        output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        output.write_bytes(resource.joinpath(name).read_bytes())
-    write_new(target / '.xingshu-installed.json', {'schema': 'xingshu-collaboration-skill/1', 'version': __version__})
+    with tempfile.TemporaryDirectory(prefix='.xingshu-skill-', dir=target.parent) as temporary:
+        staging = Path(temporary)
+        for name, content in contents.items():
+            output = staging / name
+            output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+            output.write_bytes(content)
+        write_new(staging / '.xingshu-installed.json', {'schema': 'xingshu-collaboration-skill/1', 'version': __version__})
+        # Reserve the destination without replacing an existing directory. The final rename
+        # replaces only our empty reservation; a populated destination makes rename fail.
+        target.mkdir(mode=0o700)
+        try:
+            staging.rename(target)
+        except OSError:
+            try: target.rmdir()
+            except OSError: pass
+            raise
     return {'installed': str(target), 'implicit_invocation': False, 'native_tools_installed': False}
 
 

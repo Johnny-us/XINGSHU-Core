@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from xingshu_collaboration.binding import CandidateError
 from xingshu_collaboration.cli import OfficialToolCall, archive_skill, install_skill, send
@@ -190,6 +191,18 @@ class InstallationTests(unittest.TestCase):
         destination = self.base / 'xingshu-collaborate'; destination.mkdir()
         with self.assertRaisesRegex(CandidateError, 'NEW_NAMED'):
             install_skill(destination)
+
+    def test_failed_skill_install_rolls_back_without_changing_private_material(self):
+        private_skill = self.base / 'existing-private-skill'; private_skill.mkdir()
+        (private_skill / 'SKILL.md').write_text('synthetic existing skill')
+        config_before = (self.installation.root / 'installation.json').read_bytes()
+        destination = self.base / 'skills/xingshu-collaborate'
+        with patch('xingshu_collaboration.cli.write_new', side_effect=OSError('synthetic write failure')):
+            with self.assertRaises(OSError): install_skill(destination)
+        self.assertFalse(destination.exists())
+        self.assertEqual(list(destination.parent.iterdir()), [])
+        self.assertEqual((private_skill / 'SKILL.md').read_text(), 'synthetic existing skill')
+        self.assertEqual((self.installation.root / 'installation.json').read_bytes(), config_before)
 
     def test_foreign_skill_directory_cannot_be_archived(self):
         destination = self.base / 'xingshu-collaborate'; destination.mkdir()
