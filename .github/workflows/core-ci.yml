@@ -67,3 +67,5 @@ jobs:
         run: python -m pytest tests/collaboration -q --import-mode=importlib
       - name: Check continuation driver
         run: node --test tests/collaboration/test_continuation_driver.cjs
+      - name: Verify standalone chat continuity skill package
+        run: python scripts/check_switch_chat_skill.py

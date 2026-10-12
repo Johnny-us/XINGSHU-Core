@@ -65,6 +65,8 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 
 主动协作组件 v0.1.0 已完成限定范围的源码、安装与前台真实闭环验收：由 Codex 主持送审，Web GPT 复核，再由 Codex 从原入口读取结果。安装入口见 [Collaboration Install（对话协作安装）](docs/COLLABORATION_INSTALL.md)，具体范围见 [Collaboration Scope（协作范围）](docs/COLLABORATION_SCOPE.md)。每台机器仍需检查客户端工具、登录和自己的两端绑定；自动换窗与普通 Web 直接调用 Codex 尚未完成，下载不使私人实例自动采用。
 
+只想安装换窗接续技能，可使用独立的 [`xingshu-switch-chat` 技能包](docs/SWITCH_CHAT_SKILL_INSTALL.md)，无须安装整套 Core。支持从 GitHub 选定技能路径安装或下载单独 ZIP；本包是主动流程预发布，实际双端建窗取决于宿主工具，完整双端真实验收尚未完成。
+
 1. 阅读 [Getting Started（开始使用）](docs/GETTING_STARTED.md)；
 2. 选择明确的 Core 版本并确认其治理状态；
 3. 建立 Explicitly Adopted Core Baseline（明确采用的核心基线）；
@@ -95,6 +97,7 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 | [Project Conversation Continuity](docs/PROJECT_CONVERSATION_CONTINUITY.md) | 非规范性对话接续说明候选；进度保留、身份核验、结果返回及接线与导航分段 |
 | [Collaboration Install](docs/COLLABORATION_INSTALL.md) | 主动协作 v0.1.0 安装；本机绑定、官方工具桥接与可恢复卸载 |
 | [Collaboration Scope](docs/COLLABORATION_SCOPE.md) | 前台协作的验收范围、首次使用条件与自动换窗后续门槛 |
+| [Switch Chat Skill Install](docs/SWITCH_CHAT_SKILL_INSTALL.md) | 独立换窗接续技能；GitHub 与 ZIP 安装、主动调用及可恢复卸载 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |
