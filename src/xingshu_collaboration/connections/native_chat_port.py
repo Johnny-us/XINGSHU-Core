@@ -22,7 +22,8 @@ class HostAcceptance:
 
 class NativeChatHostPort:
     """不解释正文。原生提交无消息 ID 时，须实际读到新增原文才返回身份。"""
-    def __init__(self, endpoint, *, read, submit, maximum_payload_bytes=16384, payload_validator=None):
+    def __init__(self, endpoint, *, read, submit, maximum_payload_bytes=16384, payload_validator=None,
+                 inspect_read=None):
         self.endpoint = endpoint.validate()
         if not callable(read) or not callable(submit):
             raise CandidateError('NATIVE_HOST_BINDING_INVALID')
@@ -31,6 +32,9 @@ class NativeChatHostPort:
         if payload_validator is not None and not callable(payload_validator):
             raise CandidateError('NATIVE_HOST_PAYLOAD_VALIDATOR_INVALID')
         self.payload_validator = payload_validator
+        if inspect_read is not None and not callable(inspect_read):
+            raise CandidateError('NATIVE_HOST_INSPECTOR_INVALID')
+        self.inspect_read = inspect_read
         self.capabilities().validate()
         self.baseline = None
         self.acceptance_sink = None
@@ -48,7 +52,9 @@ class NativeChatHostPort:
         return self.endpoint.resource_uri
 
     def _view(self, timeout_ms=30000):
-        view = self.read(self.resource_id, timeout_ms)
+        return self._validated_view(self.read(self.resource_id, timeout_ms))
+
+    def _validated_view(self, view):
         if (type(view) is not ChatView or view.resource_id != self.resource_id
                 or type(view.busy) is not bool or type(view.records) is not tuple
                 or len(view.records) > 100
@@ -64,7 +70,9 @@ class NativeChatHostPort:
 
     def inspect(self):
         """Readability does not require an idle source; this grants no submission readiness."""
-        return self._view()
+        if self.inspect_read is None:
+            return self._view()
+        return self._validated_view(self.inspect_read(self.resource_id, 30000))
 
     def validate_payload(self, payload):
         if type(payload) is not bytes or len(payload) > self.maximum_payload_bytes:

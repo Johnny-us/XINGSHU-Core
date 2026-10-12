@@ -65,6 +65,19 @@ class NativeHostTests(unittest.TestCase):
         with self.assertRaisesRegex(CandidateError,'TIMEOUT'): self.port.submit(b'raw',time.monotonic()-1)
         self.submit.assert_not_called()
 
+    def test_inspection_callback_is_validated_and_cannot_replace_delivery_read(self):
+        inspector=Mock(return_value=ChatView(self.endpoint.resource_uri,(),True))
+        port=NativeChatHostPort(self.endpoint,read=self.port.read,submit=self.submit,inspect_read=inspector)
+        self.assertTrue(port.inspect().busy)
+        port.preflight();self.assertEqual(port.checkpoint(),frozenset({'OLD'}))
+        inspector.assert_called_once()
+        inspector.return_value=ChatView('WRONG',())
+        with self.assertRaisesRegex(CandidateError,'IDENTITY'):port.inspect()
+
+    def test_inspector_must_be_callable(self):
+        with self.assertRaisesRegex(CandidateError,'INSPECTOR_INVALID'):
+            NativeChatHostPort(self.endpoint,read=self.port.read,submit=self.submit,inspect_read=True)
+
 class AppCodecTests(unittest.TestCase):
     def setUp(self):
         self.thread_id='11111111-2222-4333-8444-555555555555'
@@ -119,6 +132,28 @@ class AppCodecTests(unittest.TestCase):
         with self.assertRaisesRegex(CandidateError,'RESOURCE_BINDING_CONFLICT'):
             create_codex_app_port(Endpoint('APP','ACTOR','test://not-native'),self.thread_id,callback)
         callback.assert_not_called()
+
+    def test_diagnostic_reads_metadata_but_delivery_retains_complete_inputs(self):
+        endpoint=Endpoint('APP','ACTOR','codex://threads/'+self.thread_id)
+        calls=[]
+        def call(method,args):
+            calls.append((method,args))
+            return self.wrap({'thread':{'id':self.thread_id,'kind':'codex','status':{'type':'active','activeFlags':[]}},
+                              'turns':[{'status':'completed','items':[{'type':'userMessage','id':'I',
+                                         'content':[{'type':'text','text':'完整原文'}]}]}]})
+        port=create_codex_app_port(endpoint,self.thread_id,call)
+        self.assertEqual(port.inspect(),ChatView(endpoint.resource_uri,(),True))
+        self.assertFalse(calls[0][1]['includeOutputs']);self.assertEqual(calls[0][1]['maxOutputCharsPerItem'],1000)
+        view=port._view();self.assertEqual(view.records[0].payload,'完整原文'.encode())
+        self.assertTrue(calls[1][1]['includeOutputs']);self.assertEqual(calls[1][1]['maxOutputCharsPerItem'],20000)
+        with self.assertRaisesRegex(CandidateError,'BUSY'):port.checkpoint()
+
+    def test_metadata_inspection_still_rejects_wrong_identity_and_system_error(self):
+        port=create_codex_app_port(self.endpoint,self.thread_id,lambda *_:self.view('OTHER'))
+        with self.assertRaisesRegex(CandidateError,'THREAD_CONFLICT'):port.inspect()
+        port=create_codex_app_port(self.endpoint,self.thread_id,lambda *_:self.wrap(
+            {'thread':{'id':self.thread_id,'kind':'chatgpt','status':{'type':'systemError'}},'turns':[]}))
+        with self.assertRaisesRegex(CandidateError,'SYSTEM_ERROR'):port.inspect()
 
 class StdioBridgeTests(unittest.TestCase):
     def call(self,raw,params=None):

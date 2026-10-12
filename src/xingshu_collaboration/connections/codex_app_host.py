@@ -39,10 +39,11 @@ def create_codex_app_port(endpoint, thread_id, call):
     if match is None or thread_id!=match.group(1):raise CandidateError('NATIVE_APP_RESOURCE_BINDING_CONFLICT')
     native_id=match.group(1)
 
-    def read(resource_uri, timeout_ms):
+    def read(resource_uri, timeout_ms, *, inspect_only=False):
         if resource_uri!=endpoint.resource_uri:raise CandidateError('NATIVE_APP_RESOURCE_BINDING_CONFLICT')
         result = tool_json(call('read_thread', {'threadId':native_id,'turnLimit':1,
-                                                'includeOutputs':native_kind=='codex','maxOutputCharsPerItem':20000,
+                                                'includeOutputs':native_kind=='codex' and not inspect_only,
+                                                'maxOutputCharsPerItem':1000 if inspect_only else 20000,
                                                 'timeout_ms':timeout_ms}))
         if (result.get('thread',{}).get('id')!=native_id or result['thread'].get('kind')!=native_kind
                 or type(result.get('turns')) is not list):
@@ -51,7 +52,7 @@ def create_codex_app_port(endpoint, thread_id, call):
         if status.get('type') == 'systemError':
             raise CandidateError('NATIVE_HOST_SYSTEM_ERROR_STOP')
         records=[]
-        for turn in result['turns']:
+        for turn in (() if inspect_only else result['turns']):
             for item in turn.get('items',[]):
                 if (native_kind=='codex' and item.get('type')=='functionCallOutput'
                         and item.get('namespace')=='codex_app' and item.get('name')=='send_message_to_thread'):
@@ -95,4 +96,5 @@ def create_codex_app_port(endpoint, thread_id, call):
             raise CandidateError('NATIVE_APP_BOUNDARY_WHITESPACE_UNSUPPORTED')
 
     return NativeChatHostPort(endpoint,read=read,submit=submit,maximum_payload_bytes=16384,
-                              payload_validator=validate_payload)
+                              payload_validator=validate_payload,
+                              inspect_read=lambda uri, timeout: read(uri, timeout, inspect_only=True))
