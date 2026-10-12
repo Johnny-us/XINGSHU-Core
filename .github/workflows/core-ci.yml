@@ -37,3 +37,33 @@ jobs:
         run: python -m pip check
       - name: Run full test suite
         run: python -m pytest tests/ -v --import-mode=importlib
+
+  collaboration-install:
+    name: Collaboration package on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Build distribution
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Verify clean installation and reversible skill removal
+        run: python scripts/check_collaboration_install.py dist
+      - name: Install test dependencies
+        run: python -m pip install -e . -r requirements-test.txt 'pytest==9.1.1'
+      - name: Check collaboration contracts
+        run: python -m pytest tests/collaboration -q --import-mode=importlib
+      - name: Check continuation driver
+        run: node --test tests/collaboration/test_continuation_driver.cjs

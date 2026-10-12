@@ -16,6 +16,10 @@ dependencies = [
 
 [project.scripts]
 xingshu = "xingshu_core.cli:main"
+xingshu-collab = "xingshu_collaboration.cli:main"
+
+[tool.setuptools.package-data]
+xingshu_collaboration = ["skill/SKILL.md", "skill/agents/openai.yaml", "connections/*.cjs"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
