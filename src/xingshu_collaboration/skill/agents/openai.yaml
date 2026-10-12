@@ -1,0 +1,6 @@
+interface:
+  display_name: "星枢在线对话协作"
+  short_description: "明确调用前台送审、版本复核和原入口结果读回"
+  default_prompt: "使用 $xingshu-collaborate 接续我已授权的当前项目任务，先核对工具、本机绑定与恢复点。"
+policy:
+  allow_implicit_invocation: false

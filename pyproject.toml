@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "xingshu-core"
 version = "0.4.0.dev0"
-description = "Read-only runnable validation candidate for XINGSHU-Core"
+description = "Core validation and explicit foreground collaboration for XINGSHU"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
@@ -16,6 +16,10 @@ dependencies = [
 
 [project.scripts]
 xingshu = "xingshu_core.cli:main"
+xingshu-collab = "xingshu_collaboration.cli:main"
+
+[tool.setuptools.package-data]
+xingshu_collaboration = ["skill/SKILL.md", "skill/agents/openai.yaml", "connections/*.cjs"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

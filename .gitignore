@@ -11,3 +11,8 @@ __pycache__/
 .venv/
 build/
 dist/
+local-collaboration/
+inventory.json
+request.txt
+.agents/skills/xingshu-collaborate/
+disabled-skills/
