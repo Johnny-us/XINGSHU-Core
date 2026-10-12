@@ -113,12 +113,18 @@ def run(args):
             installation = Installation(args.directory)
             config, binding = installation.binding('DOCTOR')
             callback = StdioHostCall()
+            report['endpoints'] = []
             for endpoint in binding.endpoints:
                 port = create_codex_app_port(endpoint, native_id(endpoint),
                     OfficialToolCall(callback, endpoint=endpoint, codex_host_id=config['codex_host_id']))
-                port.preflight()
+                view = port.inspect()
+                report['endpoints'].append({'endpoint_id': endpoint.endpoint_id,
+                    'read_verified': True, 'busy': view.busy,
+                    'ready_for_submission': not view.busy})
             report['actual_host_connectivity'] = True
             report['account_login_verified'] = True
+            report['ready_to_attempt_online_workflow'] = report['ready_to_attempt_online_workflow'] and any(
+                row['ready_for_submission'] for row in report['endpoints'])
         return report
     if args.command == 'install-skill': return install_skill(args.destination)
     if args.command == 'uninstall-skill': return archive_skill(args.destination, args.archive_directory)

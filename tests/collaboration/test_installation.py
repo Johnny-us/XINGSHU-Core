@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from xingshu_collaboration.binding import CandidateError
-from xingshu_collaboration.cli import OfficialToolCall, archive_skill, install_skill, send
+from xingshu_collaboration.cli import OfficialToolCall, archive_skill, install_skill, parser, run, send
 from xingshu_collaboration.connections.codex_app_host import create_codex_app_port, tool_json
 from xingshu_collaboration.connections.contracts import Endpoint
 from xingshu_collaboration.connections.stdio_host import StdioHostCall
@@ -117,6 +117,36 @@ class InstallationTests(unittest.TestCase):
     def test_missing_send_tool_is_reported(self):
         self.bind()
         self.assertIn('send_message_to_thread', doctor(self.installation.root, {'tools': ['read_thread']})['missing_tools'])
+
+    def inspect_pair(self, source_status, peer_status):
+        self.bind()
+        hosts = {CODEX: SyntheticHost(), WEB: SyntheticHost()}
+        hosts[CODEX].status, hosts[WEB].status = source_status, peer_status
+        inventory = self.base / 'inventory.json'
+        inventory.write_text(json.dumps({'tools': ['read_thread', 'send_message_to_thread', 'list_projects', 'list_threads']}))
+        def call(method, params): return hosts[params['threadId']](method, params)
+        args = parser().parse_args(['doctor', '--directory', str(self.installation.root),
+            '--inventory', str(inventory), '--stdio-host'])
+        with patch('xingshu_collaboration.cli.StdioHostCall', return_value=call):
+            result = run(args)
+        self.assertFalse(hosts[CODEX].sent or hosts[WEB].sent)
+        return result
+
+    def test_live_doctor_can_read_active_source_and_report_idle_peer(self):
+        report = self.inspect_pair('active', 'idle')
+        self.assertTrue(report['actual_host_connectivity'])
+        self.assertTrue(report['ready_to_attempt_online_workflow'])
+        self.assertFalse(report['endpoints'][0]['ready_for_submission'])
+        self.assertTrue(report['endpoints'][1]['ready_for_submission'])
+
+    def test_live_doctor_reports_both_busy_without_submission(self):
+        report = self.inspect_pair('active', 'active')
+        self.assertTrue(report['actual_host_connectivity'])
+        self.assertFalse(report['ready_to_attempt_online_workflow'])
+
+    def test_live_doctor_system_error_remains_a_stop(self):
+        with self.assertRaisesRegex(CandidateError, 'SYSTEM_ERROR'):
+            self.inspect_pair('active', 'systemError')
 
     def test_send_observes_input_but_does_not_claim_review(self):
         self.bind(); host = SyntheticHost()

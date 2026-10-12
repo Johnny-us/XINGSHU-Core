@@ -59,6 +59,10 @@ class NativeChatHostPort:
         if self._view().busy:
             raise CandidateError('NATIVE_HOST_BUSY_STOP')
 
+    def inspect(self):
+        """Readability does not require an idle source; this grants no submission readiness."""
+        return self._view()
+
     def checkpoint(self):
         view = self._view()
         if view.busy:
