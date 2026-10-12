@@ -81,6 +81,8 @@ class PortConnection:
         caps = port.capabilities().validate()
         if len(payload) > caps.maximum_payload_bytes:
             raise CandidateError('HOST_PAYLOAD_BOUND_STOP')
+        if hasattr(port, 'validate_payload'):
+            port.validate_payload(payload)
         port.preflight()
         self.registry.resolve(endpoint)
         uris = {e.endpoint_id: e.resource_uri for e in self.binding.endpoints}

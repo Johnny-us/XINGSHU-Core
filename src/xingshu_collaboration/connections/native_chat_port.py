@@ -22,12 +22,15 @@ class HostAcceptance:
 
 class NativeChatHostPort:
     """不解释正文。原生提交无消息 ID 时，须实际读到新增原文才返回身份。"""
-    def __init__(self, endpoint, *, read, submit, maximum_payload_bytes=16384):
+    def __init__(self, endpoint, *, read, submit, maximum_payload_bytes=16384, payload_validator=None):
         self.endpoint = endpoint.validate()
         if not callable(read) or not callable(submit):
             raise CandidateError('NATIVE_HOST_BINDING_INVALID')
         self.read, self.submit_native = read, submit
         self.maximum_payload_bytes = maximum_payload_bytes
+        if payload_validator is not None and not callable(payload_validator):
+            raise CandidateError('NATIVE_HOST_PAYLOAD_VALIDATOR_INVALID')
+        self.payload_validator = payload_validator
         self.capabilities().validate()
         self.baseline = None
         self.acceptance_sink = None
@@ -63,6 +66,12 @@ class NativeChatHostPort:
         """Readability does not require an idle source; this grants no submission readiness."""
         return self._view()
 
+    def validate_payload(self, payload):
+        if type(payload) is not bytes or len(payload) > self.maximum_payload_bytes:
+            raise CandidateError('NATIVE_HOST_PAYLOAD_BOUND_REQUIRED')
+        if self.payload_validator is not None:
+            self.payload_validator(payload)
+
     def checkpoint(self):
         view = self._view()
         if view.busy:
@@ -80,6 +89,7 @@ class NativeChatHostPort:
     def submit(self, payload, deadline):
         if self.baseline is None or type(payload) is not bytes or len(payload) > self.maximum_payload_bytes:
             raise CandidateError('NATIVE_HOST_CHECKPOINT_OR_BOUND_REQUIRED')
+        self.validate_payload(payload)
         accepted = self.submit_native(self.resource_id, payload, self._remaining(deadline))
         if (type(accepted) is not HostAcceptance or accepted.accepted is not True
                 or type(accepted.evidence_ref) is not str or not accepted.evidence_ref):

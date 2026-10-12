@@ -64,6 +64,8 @@ python3.11 -m venv .venv
 
 正文文件须为 UTF-8，最大 16384 字节。消息编号在同一登记内必须唯一，正文写明任务、版本、目的与停止条件。
 
+官方聊天接口曾实际去掉末尾换行。此适配器在任何工具调用和日志创建之前拒绝开头/末尾空白及空正文，不会自动删改。写入文件时使用 `Path(...).write_bytes(text.encode('utf-8'))` 保存用户确认的正文；正文中间的换行继续原样保留。其他宿主是否支持边界空白需分别实测，通用投递核心不作此改写。
+
 ```sh
 .venv/bin/xingshu-collab send --directory "$PWD/local-collaboration" \
   --task-id TASK_001 --message-id MESSAGE_001 --source CODEX_DESKTOP \

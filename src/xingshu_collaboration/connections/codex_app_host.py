@@ -87,4 +87,12 @@ def create_codex_app_port(endpoint, thread_id, call):
         return HostAcceptance(accepted,ref)
 
     # 回读上限 20000 个字符；字节上限更保守，防止截断正文后误认实读。
-    return NativeChatHostPort(endpoint,read=read,submit=submit,maximum_payload_bytes=16384)
+    def validate_payload(payload):
+        # The official app has been observed removing a terminal newline. Refuse
+        # unsupported boundary formatting before any submission; never trim it.
+        text = payload.decode('utf-8')
+        if not text or text != text.strip():
+            raise CandidateError('NATIVE_APP_BOUNDARY_WHITESPACE_UNSUPPORTED')
+
+    return NativeChatHostPort(endpoint,read=read,submit=submit,maximum_payload_bytes=16384,
+                              payload_validator=validate_payload)

@@ -150,10 +150,19 @@ class InstallationTests(unittest.TestCase):
 
     def test_send_observes_input_but_does_not_claim_review(self):
         self.bind(); host = SyntheticHost()
-        result = send(self.installation, 'TASK', 'MESSAGE', 'CODEX_DESKTOP', b'synthetic original\r\n', host)
+        result = send(self.installation, 'TASK', 'MESSAGE', 'CODEX_DESKTOP', b'synthetic\r\noriginal', host)
         self.assertTrue(result['result']['delivered'])
-        self.assertEqual(host.sent[0]['prompt'], 'synthetic original\r\n')
+        self.assertEqual(host.sent[0]['prompt'], 'synthetic\r\noriginal')
         self.assertFalse(result['model_turn_consumed'])
+
+    def test_boundary_whitespace_is_rejected_without_tool_calls_or_journal(self):
+        self.bind()
+        for payload in (b'original\n', b' original', '\u2003original'.encode(), b'original\r\n', b''):
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(CandidateError, 'BOUNDARY_WHITESPACE'):
+                    send(self.installation, 'TASK', 'MESSAGE', 'CODEX_DESKTOP', payload,
+                         lambda *_: self.fail('format must be rejected before any tool call'))
+                self.assertFalse((self.installation.root / 'delivery').exists())
 
     def test_repeated_message_does_not_submit_twice(self):
         self.bind(); host = SyntheticHost()
