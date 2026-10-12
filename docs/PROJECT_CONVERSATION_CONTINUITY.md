@@ -13,7 +13,7 @@ activation_state: not_active
 
 项目授权与机械传递职责分别沿用[项目级持续协作](OWNER_STARTED_CONTINUOUS_COLLABORATION.md)和[机器人固定岗位与路线](ROBOT_FIXED_ROLE_FIXED_ROUTE.md)。本说明补充对话接续的实现考虑，不重新授予来源、执行、发布或后台权限。
 
-配套可安装实现候选见 [对话协作安装](COLLABORATION_INSTALL.md)。它提供连接/路由库、明确调用的技能和前台官方工具桥接，仍需单独完成精确版本审查和本机验证；本文自身的非规范性、默认关闭与无部署保证状态保持不变。
+配套实现见 [对话协作安装](COLLABORATION_INSTALL.md)。主动协作 v0.1.0 已完成限定范围的前台闭环与安装验收；自动换窗仍待完成，具体门槛见 [协作范围](COLLABORATION_SCOPE.md)。本文自身的非规范性、默认关闭与无部署保证状态保持不变，每个新实例仍需本机验证。
 
 ## 1. 一个任务跨对话继续
 

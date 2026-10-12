@@ -63,7 +63,7 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 
 ## Quick Start（快速开始）
 
-在线两端协作与换窗接续的独立安装入口见 [Collaboration Install（对话协作安装）](docs/COLLABORATION_INSTALL.md)。该可安装组件当前待独立验收，需另行检查客户端工具、登录和本机绑定；下载源码不代表任何私人实例自动采用。
+主动协作组件 v0.1.0 已完成限定范围的源码、安装与前台真实闭环验收：由 Codex 主持送审，Web GPT 复核，再由 Codex 从原入口读取结果。安装入口见 [Collaboration Install（对话协作安装）](docs/COLLABORATION_INSTALL.md)，具体范围见 [Collaboration Scope（协作范围）](docs/COLLABORATION_SCOPE.md)。每台机器仍需检查客户端工具、登录和自己的两端绑定；自动换窗与普通 Web 直接调用 Codex 尚未完成，下载不使私人实例自动采用。
 
 1. 阅读 [Getting Started（开始使用）](docs/GETTING_STARTED.md)；
 2. 选择明确的 Core 版本并确认其治理状态；
@@ -93,7 +93,8 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 | [Personal Instance Daily Context Validation](docs/PERSONAL_INSTANCE_DAILY_CONTEXT_VALIDATION.md) | 非规范性验证里程碑；私人实例已完成有边界真实验证，公共核心未打包日用上下文产品 |
 | [Context Metadata Lookup](docs/CONTEXT_METADATA_LOOKUP_BOUNDARY.md) | 上下文元数据查找契约候选；查找不产生正文读取权或客户端认证 |
 | [Project Conversation Continuity](docs/PROJECT_CONVERSATION_CONTINUITY.md) | 非规范性对话接续说明候选；进度保留、身份核验、结果返回及接线与导航分段 |
-| [Collaboration Install](docs/COLLABORATION_INSTALL.md) | 明确调用的协作安装候选；本机配置、官方工具桥接、证据分层和可恢复卸载 |
+| [Collaboration Install](docs/COLLABORATION_INSTALL.md) | 主动协作 v0.1.0 安装；本机绑定、官方工具桥接与可恢复卸载 |
+| [Collaboration Scope](docs/COLLABORATION_SCOPE.md) | 前台协作的验收范围、首次使用条件与自动换窗后续门槛 |
 | [Knowledge Object Model](Global/KNOWLEDGE_OBJECT_MODEL.md) | 主笔记、附录、溯源与派生视图边界 |
 | [Migration Provenance](Global/MIGRATION_PROVENANCE.md) | 多来源迁移的映射、遗漏、冲突与状态分离 |
 | [Schema Registry](schemas/README.md) | v0.2 与 v0.3 机器 Schema 的唯一导航入口 |

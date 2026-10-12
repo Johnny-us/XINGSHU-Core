@@ -1,19 +1,21 @@
-# 星枢在线对话协作安装
+# 星枢主动协作 v0.1.0 安装
 
 本组件提取通用连接与项目接续实现。安装代码与获得客户端工具是两件事。支持的在线路线由已登录、具备官方聊天读取/发送工具的本地智能端主持；普通 Web GPT 的本地工具权限不会随 GitHub 下载而出现。
 
 ## 状态与适用范围
 
-当前为待独立验收的公共实现候选。未声明正式私人配置采用、另一台实体机器实测或普通 Web 单入口直接调度完成。任何后续通过记录必须绑定精确提交/源码摘要与实际证据，不能根据测试数改写此状态。
+本版采用的使用范围是前台主动协作：由具备官方聊天工具的 Codex 主持送审，Web GPT 在现有对话独立复核，Codex 从原入口读取结果。源码、公私边界、wheel 与源码包安装已经过独立复核，安装版完成过一次真实闭环。详见 [协作范围](COLLABORATION_SCOPE.md)。
+
+自动换窗、普通 Web 直接调用 Codex、私人正式路由切换和另一台实体机器实测仍未完成。换窗库可供开发，但不能当成已完成的自动产品。公开组件采用不改变 Core 治理或任何既有私人配置。
 
 支持 Python 3.11+ 的 macOS/Linux。Windows 的文件锁和前台桥接尚未实现。使用独立虚拟环境，避免替换已有 XINGSHU Core 安装。本组件没有后台服务、公开监听、API Key、自动导入私人记录或隐式触发。
 
 ## 从 GitHub 安装
 
-完成审查并进入 main 后，才使用 main 安装。测试候选时改用经核验的精确提交；不要把未合并分支当正式发布。
+建议固定协作组件发布标签 `collaboration-v0.1.0` 安装；未发布的分支只用于开发。Python 命令可以换成机器上实际安装的 Python 3.11 及以上版本。
 
 ```sh
-git clone https://github.com/Johnny-us/XINGSHU-Core.git
+git clone --branch collaboration-v0.1.0 --depth 1 https://github.com/Johnny-us/XINGSHU-Core.git
 cd XINGSHU-Core
 python3.11 -m venv .venv
 .venv/bin/python -m pip install .
@@ -21,7 +23,7 @@ python3.11 -m venv .venv
 .venv/bin/xingshu-collab doctor
 ```
 
-最后一个命令会报告未绑定/缺宿主工具并返回退出码 2。这是首次安装的正常状态，不能称为协作已经可用。Core 原有 `xingshu` 命令、治理与来源注册逻辑继续独立。
+最后一个命令会报告未绑定/缺宿主工具并返回退出码 2。这是首次安装的正常状态。完成下面的技能安装、本机绑定和真实 Doctor 后，才在该机器上使用。发行包名为 `xingshu-core`（Core 版本 `0.4.0.dev0`），本组件命令 `xingshu-collab --version` 返回 `0.1.0`；这两个版本分别描述仓库包和协作组件。Core 原有 `xingshu` 命令、治理与来源注册逻辑继续独立。
 
 ## 安装明确调用的技能
 

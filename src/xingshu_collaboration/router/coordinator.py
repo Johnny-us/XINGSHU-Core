@@ -30,7 +30,7 @@ class TaskCoordinator:
     def __init__(self, router, ports, state_root):
         self.router, self.ports = router, ports
         self.state_root = Path(state_root)
-        # 路径验证使用原存储；拒绝符号链接和正式 Runtime 目录。
+        # 存储必须位于调用方指定父目录之内，并拒绝符号链接；不提供全机保护。
         self.store = SnapshotStore(self.state_root / 'tasks', self.state_root.parent)
 
     @contextmanager
