@@ -15,4 +15,6 @@ local-collaboration/
 inventory.json
 request.txt
 .agents/skills/xingshu-collaborate/
+.agents/skills/xingshu-switch-chat/
+.xingshu-chat-continuity/
 disabled-skills/
