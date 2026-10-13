@@ -1,6 +1,6 @@
 interface:
   display_name: "星枢换窗接续"
-  short_description: "主动准备 Codex 与普通 Web 同主题接续，保存进度并核验返回，默认不跳转"
-  default_prompt: "使用 $xingshu-switch-chat 把当前已授权任务接续到 Codex 与普通 Web 的新对应聊天，先保存进度与恢复点，核验上下文、链路和结果返回，默认不自动跳转；缺少必要工具时保留原窗口并说明缺口。"
+  short_description: "接续 Codex 与普通 Web，Web 默认用 Chrome 电脑操作，当前聊天不跳转"
+  default_prompt: "执行 $xingshu-switch-chat，将当前任务和已完成进度接续到 Codex 与普通 Web 的对应聊天；Web 默认使用 Chrome 电脑操作，核验实际接收及返回，保留当前聊天、不自动跳转。若本次只是检查、修改技能或询问状态，则不启动换窗。"
 policy:
   allow_implicit_invocation: false

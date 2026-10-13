@@ -1,0 +1,24 @@
+{
+  "name": "xingshu-switch-chat",
+  "version": "0.2.0",
+  "owner": "XINGSHU Core maintainers",
+  "status": "experimental",
+  "maturity_tier": "scaffold",
+  "lifecycle_stage": "scaffold",
+  "classification": "PUBLIC_CANDIDATE",
+  "runtime_activation": false,
+  "review_cadence": "per-release",
+  "output_contract": "Explicit bounded paired handoff, same progress/version/stops and actually read return evidence",
+  "rollback_boundary": "Archive the old skill outside discovery directories; preserve real chats and unknown submissions",
+  "license": "Apache-2.0",
+  "optional_validator": "scripts/validate_run.py",
+  "validator_dependencies": "Python standard library only",
+  "updated_at": "2026-10-13",
+  "context_budget_tier": "production",
+  "factory_components": [
+    "references",
+    "scripts",
+    "evals",
+    "reports"
+  ]
+}

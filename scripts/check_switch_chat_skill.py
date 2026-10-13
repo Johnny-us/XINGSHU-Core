@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import shutil
 import stat
+import subprocess
+import sys
 import tempfile
 import zipfile
 
@@ -57,13 +59,29 @@ def main() -> None:
         assert presentation["policy"]["allow_implicit_invocation"] is False
         assert f"${NAME}" in presentation["interface"]["default_prompt"]
         assert 25 <= len(presentation["interface"]["short_description"]) <= 64
+        manifest = json.loads((installed / "manifest.json").read_text())
+        assert manifest["name"] == NAME and manifest["version"] == VERSION
+        assert manifest["status"] == "experimental"
+        assert manifest["maturity_tier"] == manifest["lifecycle_stage"] == "scaffold"
+        assert manifest["runtime_activation"] is False
+        assert metadata["includes_optional_offline_validator"] is True
+        subprocess.run([sys.executable, "-I", "-B", str(installed / "scripts" / "validate_run.py"),
+                        "--help"], check=True, capture_output=True, text=True)
+        fixtures = subprocess.run(
+            [sys.executable, "-I", "-B", str(installed / "scripts" / "validate_run.py"),
+             "--cases", str(installed / "evals" / "run-cases.json")],
+            check=True, capture_output=True, text=True)
+        result = json.loads(fixtures.stdout)
+        assert result["evidence_kind"] == "SYNTHETIC_STATE_FIXTURE"
+        assert result["total"] == result["passed"] == 23
         archived = temporary / "disabled-skills" / NAME
         archived.parent.mkdir()
         shutil.move(str(installed), str(archived))
         assert not installed.exists()
         for name in FILES:
             assert (archived / name).read_bytes() == (ROOT / "skills" / NAME / name).read_bytes()
-    print("PASS: exact standalone ZIP, reproducible assets, checksums, explicit policy, isolated install/removal")
+    print("PASS: exact standalone ZIP, reproducible assets, checksums, explicit policy, "
+          "experimental metadata, isolated install/removal and 23 synthetic state fixtures")
 
 
 if __name__ == "__main__":

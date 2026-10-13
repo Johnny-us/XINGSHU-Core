@@ -1,0 +1,19 @@
+interface:
+  display_name: "星枢换窗接续"
+  short_description: "明确执行才建两端聊天，Chrome 电脑操作，保留进度与返回证据"
+  default_prompt: "执行 $xingshu-switch-chat 接续当前任务；检查技能或询问状态不启动换窗。"
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets: ["openai"]
+  activation:
+    mode: "manual"
+    paths: []
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "Native host tools required"

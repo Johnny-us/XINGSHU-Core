@@ -1,0 +1,73 @@
+{
+  "fallback_positive_concepts": [
+    "rollover_action",
+    "paired_context"
+  ],
+  "positive_concepts": {
+    "rollover_action": {
+      "weight": 0.65,
+      "phrases": [
+        "换窗",
+        "接续",
+        "建立对应聊天",
+        "开始新聊天",
+        "恢复已有换窗运行",
+        "rollover",
+        "continue this handoff"
+      ]
+    },
+    "paired_context": {
+      "weight": 0.35,
+      "phrases": [
+        "星枢",
+        "Codex",
+        "普通 Web",
+        "两端",
+        "对应窗口",
+        "对应聊天",
+        "xingshu-switch-chat",
+        "已有换窗运行",
+        "current handoff"
+      ]
+    }
+  },
+  "negative_concepts": {
+    "maintenance_or_status": {
+      "weight": 1.0,
+      "exclusive": true,
+      "phrases": [
+        "检查技能",
+        "检查这个技能",
+        "检查 xingshu-switch-chat",
+        "审查技能",
+        "修改技能",
+        "修改这个技能",
+        "优化技能",
+        "检测完成了吗",
+        "已经检测完成",
+        "解释技能",
+        "讲讲技能",
+        "审核这个技能",
+        "audit this skill",
+        "review this skill",
+        "edit this skill",
+        "用 yao-meta-skill 检查"
+      ]
+    },
+    "no_execution": {
+      "weight": 1.0,
+      "exclusive": true,
+      "phrases": [
+        "只讨论",
+        "不要建聊天",
+        "不创建聊天",
+        "只读检查",
+        "只要方案",
+        "后台监控",
+        "定时创建",
+        "无关新任务",
+        "new unrelated task"
+      ]
+    }
+  }
+}
