@@ -77,4 +77,4 @@ xingshu-switch-chat/
 
 `xingshu-collaborate` 主持已验收的前台送审与读回；`xingshu-switch-chat` 组织用户主动请求的换窗接续。两个技能分别安装，没有强制依赖，也不互相代替。
 
-维护者使用 `python scripts/build_switch_chat_skill.py <输出目录>` 打包固定提交，使用 `python scripts/check_switch_chat_skill.py` 核对确定性归档、隔离安装与移出发现目录。上述打包检查不代表真实双端换窗验收。
+维护者使用 `python scripts/build_switch_chat_skill.py <输出目录>` 打包固定提交，使用 `python scripts/check_switch_chat_skill.py` 核对确定性归档、隔离安装与移出发现目录。构建器只用 Python 标准库；仓库检查工具还需要 `requirements-test.txt` 声明的 PyYAML。它与包内仅用标准库的可选 `scripts/validate_run.py` 是不同工具。上述打包检查不代表真实双端换窗验收。

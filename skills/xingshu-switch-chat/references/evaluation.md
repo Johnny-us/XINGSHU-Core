@@ -8,6 +8,6 @@
 
 正式现场验收必须在该用户/该客户端授权范围内重新核对真实编号、归属、输入、模型实读、进度/停止点、接受与源入口返回。一次在线辅助闭环不能证明长期稳定、后台回调、Web自主返回、其他通道恢复或另一台机器可用。
 
-打包/安装检查运行仓库的 scripts/check_switch_chat_skill.py：固定提交字节、摘要、可重现 ZIP、隔离安装和移出发现目录、包内帮助程序与23个状态夹具。辅助脚本无第三方依赖；执行它需要已有 Python，普通使用本技能无需安装 Python。模型盲测、无技能基线、长期成功率等未提供时明确 missing evidence（证据缺失），不生成假结果。
+打包/安装检查运行仓库的 scripts/check_switch_chat_skill.py：固定提交字节、摘要、可重现 ZIP、隔离安装和移出发现目录、包内帮助程序与23个状态夹具。包内 scripts/validate_run.py 只依赖 Python 标准库；仓库维护者使用的 scripts/check_switch_chat_skill.py 另需 PyYAML（由 requirements-test.txt 声明）。执行可选校验需要已有 Python，普通使用本技能无需安装 Python。模型盲测、无技能基线、长期成功率等未提供时明确 missing evidence（证据缺失），不生成假结果。
 
 通用品质状态见 reports/output_quality_scorecard.md。实际用户记录、截图、授权正文、账号和聊天编号只留在本机，不能用于公开包。
