@@ -12,5 +12,6 @@
   "rollback_boundary": "Archive the old skill outside discovery directories; preserve real chats and unknown submissions",
   "license": "Apache-2.0",
   "optional_validator": "scripts/validate_run.py",
-  "validator_dependencies": "Python standard library only"
+  "validator_dependencies": "Python standard library only",
+  "updated_at": "2026-10-13"
 }

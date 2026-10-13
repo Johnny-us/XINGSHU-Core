@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME = "xingshu-switch-chat"
 VERSION = "0.2.0"
 FILES = (
-    "SKILL.md", "agents/openai.yaml", "LICENSE.txt", "manifest.json",
+    "SKILL.md", "agents/openai.yaml", "agents/interface.yaml", "LICENSE.txt", "manifest.json",
     "references/browser-channels.md", "references/handoff-contract.md",
     "references/evaluation.md", "scripts/validate_run.py",
     "evals/semantic-config.json", "evals/trigger-cases.json",

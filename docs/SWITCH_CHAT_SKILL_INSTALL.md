@@ -29,12 +29,13 @@
 
 可使用本机校验工具核对 SHA-256；macOS/Linux 在这三个文件所在目录运行 `shasum -a 256 -c SHA256SUMS.txt`。校验不通过时不安装。
 
-解压到新的临时目录，将其中整个 `xingshu-switch-chat` 文件夹移到当前项目的 `.agents/skills/`。目标应为 `.agents/skills/xingshu-switch-chat/SKILL.md`；已有同名文件夹或链接时先停止，不合并覆盖。技能包包含以下文件；辅助校验器仅离线读取记录，不参与聊天操作：
+解压到新的临时目录，将其中整个 `xingshu-switch-chat` 文件夹移到当前项目的 `.agents/skills/`。目标应为 `.agents/skills/xingshu-switch-chat/SKILL.md`；已有同名文件夹或链接时先停止，不合并覆盖。`agents/openai.yaml` 是原生元数据；`agents/interface.yaml` 是评测兼容投影，不能覆盖原生显式调用策略。技能包包含以下文件；辅助校验器仅离线读取记录，不参与聊天操作：
 
 ```text
 xingshu-switch-chat/
   SKILL.md
   agents/openai.yaml
+  agents/interface.yaml
   LICENSE.txt
   manifest.json
   references/browser-channels.md
