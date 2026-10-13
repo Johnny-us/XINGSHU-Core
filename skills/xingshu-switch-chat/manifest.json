@@ -13,5 +13,12 @@
   "license": "Apache-2.0",
   "optional_validator": "scripts/validate_run.py",
   "validator_dependencies": "Python standard library only",
-  "updated_at": "2026-10-13"
+  "updated_at": "2026-10-13",
+  "context_budget_tier": "production",
+  "factory_components": [
+    "references",
+    "scripts",
+    "evals",
+    "reports"
+  ]
 }

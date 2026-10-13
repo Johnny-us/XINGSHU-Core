@@ -1,6 +1,6 @@
 # 评测范围
 
-本包保持 experimental / scaffold（实验流程），不作生产就绪声明。owner（维护者）、review cadence（复查时机）、output contract（输出约定）和 rollback boundary（回退边界）见 manifest.json。
+本包保持 experimental / scaffold（实验流程），不作生产就绪声明。`context_budget_tier=production` 只选择入口文字预算，不能升级成熟度。owner（维护者）、review cadence（复查时机）、output contract（输出约定）和 rollback boundary（回退边界）见 manifest.json。
 
 `scripts/validate_run.py --cases evals/run-cases.json` 检查23个合成状态记录；包含编号、版本、进度、停止点缺失/删改、UNKNOWN、普通 Web/Work、越权导航、旧记录隔离和在线辅助返回。只证明状态约定，不证明真实投递、来源真实性或授权。
 
