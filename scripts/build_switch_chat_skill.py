@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build an instruction-only skill ZIP from exact committed public files."""
+"""Build a standalone skill ZIP from exact committed public files."""
 
 from __future__ import annotations
 
@@ -12,8 +12,14 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "xingshu-switch-chat"
-VERSION = "0.1.0"
-FILES = ("SKILL.md", "agents/openai.yaml", "LICENSE.txt")
+VERSION = "0.2.0"
+FILES = (
+    "SKILL.md", "agents/openai.yaml", "LICENSE.txt", "manifest.json",
+    "references/browser-channels.md", "references/handoff-contract.md",
+    "references/evaluation.md", "scripts/validate_run.py",
+    "evals/semantic-config.json", "evals/trigger-cases.json",
+    "evals/run-cases.json", "reports/output_quality_scorecard.md",
+)
 ARCHIVE = f"{NAME}-{VERSION}.zip"
 INFO = "switch-chat-skill-build-info.json"
 SUMS = "SHA256SUMS.txt"
@@ -66,7 +72,9 @@ def build_release(output: Path) -> dict:
         "source_tree": tree,
         "skill_path": f"skills/{NAME}",
         "license": "Apache-2.0",
-        "instructions_only": True,
+        "instructions_only": False,
+        "includes_optional_offline_validator": True,
+        "validator_dependencies": "Python standard library only",
         "requires_core_install": False,
         "full_two_endpoint_live_switch_accepted": False,
         "files": [{"path": f"{NAME}/{name}", "bytes": len(data),

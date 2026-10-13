@@ -1,0 +1,97 @@
+{
+  "evidence_kind": "HEURISTIC_TRIGGER_FIXTURE_NOT_MODEL_EVIDENCE",
+  "recommended_threshold": 0.48,
+  "should_trigger": [
+    {
+      "text": "执行星枢换窗接续，建立 Codex 与普通 Web 对应窗口。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "使用 xingshu-switch-chat，把当前任务接续到两端，保留进度。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "继续已有换窗运行，完成两端进度接续和返回。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "星枢：开始新聊天，继续当前任务，不自动跳转。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "请把本轮任务接续到 Codex 与普通 Web，保留原窗口。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "只换 Codex：执行当前星枢换窗接续。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "建立对应聊天，保留星枢当前检查点。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "完成两端换窗接续实际测试，并核对结果返回。",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "Execute xingshu-switch-chat rollover for the current handoff.",
+      "family": "explicit_execution"
+    },
+    {
+      "text": "Please continue this handoff in Codex and ordinary Web.",
+      "family": "explicit_execution"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "text": "用 yao-meta-skill 检查 xingshu-switch-chat 看看问题出在哪。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "xingshu-switch-chat 已经检测完成了吗？",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "修改这个技能，让两端换窗恢复更稳。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "只读检查星枢换窗技能，不创建聊天。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "审查技能的 Codex 与普通 Web 接续边界。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "解释技能如何建立两端对应聊天。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "只讨论星枢换窗方案，不要建聊天。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "给 xingshu-switch-chat 加后台监控并定时创建窗口。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "Review this skill: xingshu-switch-chat rollover in Codex.",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "Edit this skill to use Chrome for current handoff.",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "新建一个无关新任务：安排旅行。",
+      "family": "maintenance_or_excluded"
+    },
+    {
+      "text": "只要方案：Codex 与普通 Web 对应窗口接续。",
+      "family": "maintenance_or_excluded"
+    }
+  ],
+  "near_neighbors": []
+}

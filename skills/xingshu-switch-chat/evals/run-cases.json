@@ -1,0 +1,1469 @@
+[
+  {
+    "id": "complete_host_assisted",
+    "expected": "PASS_BOUNDED",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "codex_only",
+    "expected": "PASS_BOUNDED",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "codex_only",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "isolated_old_unknown_preserved",
+    "expected": "PASS_BOUNDED",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [
+        "old-message-unknown"
+      ],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "current_unknown_no_retry",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [
+        "current-create"
+      ],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "legacy_dependency_affects_current",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": true,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "pending_client_is_not_real_identity",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": null,
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "source_not_new_chat",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-source",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "same_page_not_two_chats",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-codex",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "wrong_return",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "another-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "work_not_ordinary_web",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "work",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "changed_version",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_0",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "progress_restarted",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "metadata_not_actual_read",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": false,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "accepted_missing",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": false,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "link_not_return_read",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": false,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "integer_not_boolean",
+    "expected": "PENDING_RECOVERY",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": 1,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "no_auto_navigation",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": true,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "formal_rebinding_rejected",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": true,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "background_rejected",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": true,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "old_task_resend_rejected",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": true
+    }
+  },
+  {
+    "id": "expected_stops_missing",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": null,
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "codex_stops_omitted",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": null
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  },
+  {
+    "id": "web_stops_tampered",
+    "expected": "REJECT",
+    "record": {
+      "task_id": "FIXTURE_TASK",
+      "work_version": "FIXTURE_1",
+      "source_thread_id": "fixture-source",
+      "return_thread_id": "fixture-source",
+      "mode": "paired",
+      "expected_completed": [
+        "甲卡已完成"
+      ],
+      "expected_next_step": "乙卡核对",
+      "expected_stops": [
+        "DEPLOYMENT_STOP",
+        "NO_BACKGROUND"
+      ],
+      "codex": {
+        "thread_id": "fixture-codex",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "DEPLOYMENT_STOP",
+          "NO_BACKGROUND"
+        ]
+      },
+      "web": {
+        "thread_id": "fixture-web",
+        "kind": "ordinary_web",
+        "project_verified": true,
+        "input_read": true,
+        "accepted": true,
+        "task_id": "FIXTURE_TASK",
+        "work_version": "FIXTURE_1",
+        "already_done": [
+          "甲卡已完成"
+        ],
+        "next_step": "乙卡核对",
+        "stops": [
+          "NO_BACKGROUND"
+        ]
+      },
+      "progress_preserved": true,
+      "same_task_version": true,
+      "return_read": true,
+      "return_mode": "host_assisted",
+      "current_unknown_operations": [],
+      "isolated_legacy_unknowns": [],
+      "legacy_dependency_affects_current": false,
+      "navigation_requested": false,
+      "navigated": false,
+      "formal_binding_changed": false,
+      "background": false,
+      "old_task_resent": false
+    }
+  }
+]
