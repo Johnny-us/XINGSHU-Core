@@ -105,6 +105,10 @@ Registry（注册表）只帮助定位来源，不存放正文，不产生权限
 | [Security Policy](SECURITY.md) | 安全报告与敏感信息边界 |
 | [Contributing](CONTRIBUTING.md) | 公共贡献范围与审查流程 |
 
+## 实验性本地示例
+
+[本地运行器开发示例](docs/LOCAL_RUNNER_DEVELOPMENT_EXAMPLES.md)包含macOS假资料运行器及公开口令校验。两者均为experimental / synthetic-only（实验性／仅合成数据），不提供真实资料授权、消息发送或正式安装，不改变Core默认行为。
+
 ## Templates（模板）
 
 - [XINGSHU_ROOT.template.md](templates/XINGSHU_ROOT.template.md)：Personal Instance 根标识候选；
